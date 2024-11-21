@@ -2,7 +2,7 @@ const std = @import("std");
 const debug = std.debug.print;
 const errors = @import("errors.zig").Errors;
 const models = @import("models.zig");
-const Atom = @import("render/atom.zig").Atom;
+const Atom = @import("renderable/atom.zig").Atom;
 
 const sdl = @cImport({
     @cInclude("SDL2/SDL.h");
