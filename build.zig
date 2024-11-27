@@ -11,6 +11,12 @@ pub fn build(b: *Build) void {
         .optimize = optimize,
     });
 
+    const ziglog = b.dependency("ziglog", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    exe.root_module.addImport("ziglog", ziglog.module("ziglog"));
+
     if (target.result.os.tag == .linux) {
         // The SDL package doesn't work for Linux yet, so we rely on system
         // packages for now.

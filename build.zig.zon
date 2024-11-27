@@ -1,0 +1,11 @@
+.{
+    .name = "z3d",
+    .version = "0.0.0",
+    .dependencies = .{
+        .ziglog = .{
+            .url = "git+https://github.com/tathyagarg/ziglog?ref=v0.1.0#79d12e3f766a24491710f43bf5277ea70db54aa6",
+            .hash = "1220458beaf32c24cd897b3db5966aa16f5f9f35abd11c575c92bcdfb3c11dc53892",
+        },
+    },
+    .paths = .{"."},
+}
