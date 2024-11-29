@@ -1,5 +1,8 @@
 pub const Vec3 = @import("vec3.zig").Vec3;
-pub const Vec4 = struct { w: f32, x: f32, y: f32, z: f32 };
+pub const Vec4 = @import("vec4.zig").Vec4;
+pub const Quaternion = @import("quaternion.zig").Quaternion;
+pub const Matrix4 = @import("matrix4.zig").Matrix4;
+
 pub const Color3 = struct { r: u8, g: u8, b: u8 };
 pub const Color4 = struct { r: u8, g: u8, b: u8, a: u8 };
 
