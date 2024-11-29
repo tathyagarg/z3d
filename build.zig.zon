@@ -3,8 +3,8 @@
     .version = "0.0.0",
     .dependencies = .{
         .ziglog = .{
-            .url = "git+https://github.com/tathyagarg/ziglog?ref=v0.1.0#79d12e3f766a24491710f43bf5277ea70db54aa6",
-            .hash = "1220458beaf32c24cd897b3db5966aa16f5f9f35abd11c575c92bcdfb3c11dc53892",
+            .url = "git+https://github.com/tathyagarg/ziglog#43739bcb93047d609d1042d61ca74eebeab047aa",
+            .hash = "1220700887c5cd9a1d1f754221fad2a5570d6e526225fdfbc6f376440cc02fd1f5b0",
         },
     },
     .paths = .{"."},

@@ -2,6 +2,7 @@ const std = @import("std");
 const errors = @import("errors.zig").Errors;
 const prims = @import("math/primitives.zig");
 const Scene = @import("../scene/scene.zig").Scene;
+const constants = @import("constants.zig");
 
 const sdl = @cImport({
     @cInclude("SDL2/SDL.h");
@@ -10,8 +11,8 @@ const sdl = @cImport({
 const ziglog = @import("ziglog");
 
 pub const Engine = struct {
-    window: ?*sdl.SDL_Window,
-    renderer: ?*sdl.SDL_Renderer,
+    window: *sdl.SDL_Window,
+    renderer: *sdl.SDL_Renderer,
     running: bool = false,
 
     scene: Scene,
@@ -24,7 +25,7 @@ pub const Engine = struct {
     }
 
     pub fn init(title: [*c]const u8) !Engine {
-        const logger = try ziglog.Logger.get(.{});
+        const logger = try ziglog.Logger.get(.{ .name = "main" });
 
         // Initialize SDL_INIT_VIDEO if not already initialized
         if (sdl.SDL_WasInit(sdl.SDL_INIT_VIDEO) != 0) {
@@ -37,30 +38,35 @@ pub const Engine = struct {
         }
 
         // Create window
-        const window = sdl.SDL_CreateWindow(title, sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED, 800, 600, sdl.SDL_WINDOW_SHOWN);
-        if (window == null) {
+        const window = sdl.SDL_CreateWindow(
+            title,
+            sdl.SDL_WINDOWPOS_CENTERED,
+            sdl.SDL_WINDOWPOS_CENTERED,
+            constants.CANVAS_SIZE_X,
+            constants.CANVAS_SIZE_Y,
+            sdl.SDL_WINDOW_SHOWN,
+        ) orelse {
             try logger.err(try Engine.format_error("Window creation failed: {*}", sdl.SDL_GetError()));
             return errors.WindowCreationFailed;
-        }
+        };
         try logger.info("Window creation successful.");
 
         // Create renderer
-        const renderer = sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_ACCELERATED);
-        if (renderer == null) {
+        const renderer = sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_ACCELERATED) orelse {
             try logger.err(try Engine.format_error("Renderer creation failed: {*}", sdl.SDL_GetError()));
             return errors.RendererCreationFailed;
-        }
+        };
         try logger.info("Renderer initialization successful.");
 
-        return Engine{ .window = window, .renderer = renderer, .scene = Scene.init() };
+        return Engine{ .window = window, .renderer = renderer, .scene = try Scene.init(renderer) };
     }
 
     pub fn mainloop(self: *Self) !void {
-        const logger = try ziglog.Logger.get(.{});
+        const logger = try ziglog.Logger.get(.{ .name = "main" });
 
         self.running = true;
 
-        var status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
+        const status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
         if (status != 0) {
             try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
             return errors.SetRenderColorFailed;
@@ -68,17 +74,19 @@ pub const Engine = struct {
 
         var event: sdl.SDL_Event = undefined;
         while (self.running) {
-            status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
-            if (status != 0) {
-                try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
-                return errors.SetRenderColorFailed;
-            }
+            // status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
+            // if (status != 0) {
+            //     try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
+            //     return errors.SetRenderColorFailed;
+            // }
 
-            status = sdl.SDL_RenderClear(self.renderer);
-            if (status != 0) {
-                try logger.err(try Engine.format_error("Clearing renderer failed: {*}", sdl.SDL_GetError()));
-                return errors.RenderClearFailed;
-            }
+            // status = sdl.SDL_RenderClear(self.renderer);
+            // if (status != 0) {
+            //     try logger.err(try Engine.format_error("Clearing renderer failed: {*}", sdl.SDL_GetError()));
+            //     return errors.RenderClearFailed;
+            // }
+
+            try self.scene.render();
 
             while (sdl.SDL_PollEvent(&event) != 0) {
                 if (event.type == sdl.SDL_QUIT) {
@@ -87,7 +95,7 @@ pub const Engine = struct {
             }
 
             sdl.SDL_RenderPresent(self.renderer);
-            sdl.SDL_Delay(16);
+            sdl.SDL_Delay(constants.FRAME_DELAY);
         }
     }
 

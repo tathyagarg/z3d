@@ -1,9 +1,13 @@
 const prims = @import("../core/math/primitives.zig");
 const Scene = @import("scene.zig").Scene;
+const ziglog = @import("ziglog");
+const std = @import("std");
 
-const CANVAS_SIZE_X = 270;
-const CANVAS_SIZE_Y = 210;
-const CANVAS_PIXEL_COUNT = CANVAS_SIZE_X * CANVAS_SIZE_Y;
+const constants = @import("../core/constants.zig");
+
+const CANVAS_SIZE_X = constants.CANVAS_SIZE_X;
+const CANVAS_SIZE_Y = constants.CANVAS_SIZE_Y;
+const CANVAS_PIXEL_COUNT = constants.CANVAS_PIXEL_COUNT;
 
 pub const CameraOptions = struct {
     near_plane: f32,
@@ -21,13 +25,13 @@ pub const Camera = struct {
     /// FOV here is in degrees
     fov: prims.Vec2,
     canvas_size: prims.Vec2,
-    canvas: []prims.Color4,
+    canvas: [CANVAS_PIXEL_COUNT]prims.Color4,
 
     options: CameraOptions,
     /// The projection matrix is from Matrix4.projection_matrix
     projection_matrix: prims.Matrix4,
 
-    pub fn init(scene: Scene) Camera {
+    pub fn init(scene: Scene) !Camera {
         const canvas_size = prims.Vec2{ .x = CANVAS_SIZE_X, .y = CANVAS_SIZE_Y };
 
         var canvas: [CANVAS_PIXEL_COUNT]prims.Color4 = undefined;
@@ -49,7 +53,7 @@ pub const Camera = struct {
             .orientation = prims.Quaternion.identity(),
             .fov = prims.Vec2{ .x = 90, .y = 70 },
             .canvas_size = canvas_size,
-            .canvas = &canvas,
+            .canvas = canvas,
             .options = options,
             .projection_matrix = prims.Matrix4.projection_matrix(options),
         };
