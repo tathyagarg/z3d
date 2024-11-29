@@ -1,11 +1,4 @@
-pub const ProjectionMatrixOptions = struct {
-    near_plane: f32,
-    far_plane: f32,
-    right: f32,
-    left: f32,
-    top: f32,
-    bottom: f32,
-};
+const CameraOptions = @import("../../scene/camera.zig").CameraOptions;
 
 pub const Matrix4 = struct {
     m: [4][4]f32,
@@ -30,7 +23,7 @@ pub const Matrix4 = struct {
     /// Learn more:
     /// https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
     /// https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix.html
-    pub fn projection_matrix(options: ProjectionMatrixOptions) Matrix4 {
+    pub fn projection_matrix(options: CameraOptions) Matrix4 {
         return Matrix4{ .m = [4][4]f32{
             [4]f32{
                 (2 * options.near_plane) / (options.right - options.left),

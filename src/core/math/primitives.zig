@@ -3,6 +3,8 @@ pub const Vec4 = @import("vec4.zig").Vec4;
 pub const Quaternion = @import("quaternion.zig").Quaternion;
 pub const Matrix4 = @import("matrix4.zig").Matrix4;
 
+pub const Vec2 = struct { x: i32, y: i32 };
+
 pub const Color3 = struct { r: u8, g: u8, b: u8 };
 pub const Color4 = struct { r: u8, g: u8, b: u8, a: u8 };
 

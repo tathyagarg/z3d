@@ -1,6 +1,7 @@
 const std = @import("std");
 const errors = @import("errors.zig").Errors;
 const prims = @import("math/primitives.zig");
+const Scene = @import("../scene/scene.zig").Scene;
 
 const sdl = @cImport({
     @cInclude("SDL2/SDL.h");
@@ -13,8 +14,8 @@ pub const Engine = struct {
     renderer: ?*sdl.SDL_Renderer,
     running: bool = false,
 
-    cam_position: prims.Vec3 = prims.Vec3{ .x = 0, .y = 0, .z = 0 },
-    background_color: prims.Color4 = prims.RED,
+    scene: Scene,
+    background_color: prims.Color4 = prims.BLACK,
 
     const Self = @This();
 
@@ -51,7 +52,7 @@ pub const Engine = struct {
         }
         try logger.info("Renderer initialization successful.");
 
-        return Engine{ .window = window, .renderer = renderer };
+        return Engine{ .window = window, .renderer = renderer, .scene = Scene.init() };
     }
 
     pub fn mainloop(self: *Self) !void {
