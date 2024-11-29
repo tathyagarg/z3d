@@ -1,6 +1,6 @@
 const std = @import("std");
 const errors = @import("errors.zig").Errors;
-const prims = @import("../primitives.zig");
+const prims = @import("math/primitives.zig");
 
 const sdl = @cImport({
     @cInclude("SDL2/SDL.h");
@@ -8,7 +8,7 @@ const sdl = @cImport({
 
 const ziglog = @import("ziglog");
 
-pub const Application = struct {
+pub const Engine = struct {
     window: ?*sdl.SDL_Window,
     renderer: ?*sdl.SDL_Renderer,
     running: bool = false,
@@ -22,14 +22,14 @@ pub const Application = struct {
         return std.fmt.allocPrint(std.heap.page_allocator, text, .{err});
     }
 
-    pub fn init(title: [*c]const u8) !Application {
+    pub fn init(title: [*c]const u8) !Engine {
         const logger = try ziglog.Logger.get(.{});
 
         // Initialize SDL_INIT_VIDEO if not already initialized
         if (sdl.SDL_WasInit(sdl.SDL_INIT_VIDEO) != 0) {
             const initialization = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
             if (initialization != 0) {
-                try logger.err(try Application.format_error("Video initialization failed: {*}", sdl.SDL_GetError()));
+                try logger.err(try Engine.format_error("Video initialization failed: {*}", sdl.SDL_GetError()));
                 return errors.InitializationFailed;
             }
             try logger.info("Video initialization successful.");
@@ -38,7 +38,7 @@ pub const Application = struct {
         // Create window
         const window = sdl.SDL_CreateWindow(title, sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED, 800, 600, sdl.SDL_WINDOW_SHOWN);
         if (window == null) {
-            try logger.err(try Application.format_error("Window creation failed: {*}", sdl.SDL_GetError()));
+            try logger.err(try Engine.format_error("Window creation failed: {*}", sdl.SDL_GetError()));
             return errors.WindowCreationFailed;
         }
         try logger.info("Window creation successful.");
@@ -46,23 +46,22 @@ pub const Application = struct {
         // Create renderer
         const renderer = sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_ACCELERATED);
         if (renderer == null) {
-            try logger.err(try Application.format_error("Renderer creation failed: {*}", sdl.SDL_GetError()));
+            try logger.err(try Engine.format_error("Renderer creation failed: {*}", sdl.SDL_GetError()));
             return errors.RendererCreationFailed;
         }
         try logger.info("Renderer initialization successful.");
 
-        return Application{ .window = window, .renderer = renderer };
+        return Engine{ .window = window, .renderer = renderer };
     }
 
     pub fn mainloop(self: *Self) !void {
         const logger = try ziglog.Logger.get(.{});
 
-        defer self.destroy();
         self.running = true;
 
         var status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
         if (status != 0) {
-            try logger.err(try Application.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
+            try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
             return errors.SetRenderColorFailed;
         }
 
@@ -70,13 +69,13 @@ pub const Application = struct {
         while (self.running) {
             status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
             if (status != 0) {
-                try logger.err(try Application.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
+                try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
                 return errors.SetRenderColorFailed;
             }
 
             status = sdl.SDL_RenderClear(self.renderer);
             if (status != 0) {
-                try logger.err(try Application.format_error("Clearing renderer failed: {*}", sdl.SDL_GetError()));
+                try logger.err(try Engine.format_error("Clearing renderer failed: {*}", sdl.SDL_GetError()));
                 return errors.RenderClearFailed;
             }
 
@@ -91,7 +90,7 @@ pub const Application = struct {
         }
     }
 
-    pub fn destroy(self: *Self) void {
+    pub fn deinit(self: *Self) void {
         sdl.SDL_DestroyWindow(self.window);
         sdl.SDL_DestroyRenderer(self.renderer);
         sdl.SDL_Quit();
