@@ -12,19 +12,59 @@ const CANVAS_PIXEL_COUNT = constants.CANVAS_PIXEL_COUNT;
 pub const CameraOptions = struct {
     near_plane: f32,
     far_plane: f32,
-    right: f32,
-    left: f32,
-    top: f32,
-    bottom: f32,
+    canvas_size: prims.Vec2i,
+    focal_length: f32,
+
+    /// Vec2 of the camera's Field of View (FOV) in radians
+    /// The FOV is given by the formulae:
+    /// fov_x = 2 * atan( width / (2 * focal_length) )
+    /// fov_y = 2 * atan( height / (2 * focal_length) )
+    ///
+    /// Where width is the width of the canvas, and height is the height of the canvas.
+    ///
+    /// Learn more:
+    /// https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/perspective-matrix-in-practice.html
+    fov: prims.Vec2 = undefined,
+    points: struct { top: f32, right: f32, bottom: f32, left: f32 } = undefined,
+
+    pub fn init(
+        near_plane: f32,
+        far_plane: f32,
+        canvas_size: prims.Vec2i,
+        focal_length: f32,
+    ) CameraOptions {
+        const fov_x = 2 * std.math.atan(@as(f32, @floatFromInt(canvas_size.x)) / (2 * focal_length));
+        const fov_y = 2 * std.math.atan(@as(f32, @floatFromInt(canvas_size.y)) / (2 * focal_length));
+
+        const right = std.math.tan(fov_x / 2) * near_plane;
+        const left = -right;
+        const top = (right - left) / (@as(f32, @floatFromInt(canvas_size.x)) / @as(f32, @floatFromInt(canvas_size.y))) / 2;
+        const bottom = -top;
+
+        return CameraOptions{
+            .near_plane = near_plane,
+            .far_plane = far_plane,
+            .canvas_size = canvas_size,
+            .focal_length = focal_length,
+            .fov = prims.Vec2{
+                .x = fov_x,
+                .y = fov_y,
+            },
+            .points = .{
+                .top = top,
+                .right = right,
+                .bottom = bottom,
+                .left = left,
+            },
+        };
+    }
 };
 
 pub const Camera = struct {
     position: prims.Vec3,
     orientation: prims.Quaternion,
 
-    /// FOV here is in degrees
-    fov: prims.Vec2,
-    canvas_size: prims.Vec2,
+    canvas_size: prims.Vec2i,
     canvas: [CANVAS_PIXEL_COUNT]prims.Color4,
 
     options: CameraOptions,
@@ -32,26 +72,18 @@ pub const Camera = struct {
     projection_matrix: prims.Matrix4,
 
     pub fn init(scene: Scene) !Camera {
-        const canvas_size = prims.Vec2{ .x = CANVAS_SIZE_X, .y = CANVAS_SIZE_Y };
+        const canvas_size = prims.Vec2i{ .x = CANVAS_SIZE_X, .y = CANVAS_SIZE_Y };
 
         var canvas: [CANVAS_PIXEL_COUNT]prims.Color4 = undefined;
         for (0..CANVAS_PIXEL_COUNT) |i| {
             canvas[i] = scene.background_color;
         }
 
-        const options = CameraOptions{
-            .near_plane = 0.1,
-            .far_plane = 1000.0,
-            .top = CANVAS_SIZE_Y / 2,
-            .bottom = -CANVAS_SIZE_Y / 2,
-            .left = CANVAS_SIZE_X / 2,
-            .right = -CANVAS_SIZE_X / 2,
-        };
+        const options = CameraOptions.init(1.0, 1000.0, canvas_size, 1);
 
         return Camera{
             .position = prims.Vec3{ .x = 0, .y = 0, .z = 0 },
             .orientation = prims.Quaternion.identity(),
-            .fov = prims.Vec2{ .x = 90, .y = 70 },
             .canvas_size = canvas_size,
             .canvas = canvas,
             .options = options,

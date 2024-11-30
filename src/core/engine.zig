@@ -62,30 +62,10 @@ pub const Engine = struct {
     }
 
     pub fn mainloop(self: *Self) !void {
-        const logger = try ziglog.Logger.get(.{ .name = "main" });
-
         self.running = true;
-
-        const status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
-        if (status != 0) {
-            try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
-            return errors.SetRenderColorFailed;
-        }
 
         var event: sdl.SDL_Event = undefined;
         while (self.running) {
-            // status = sdl.SDL_SetRenderDrawColor(self.renderer, self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
-            // if (status != 0) {
-            //     try logger.err(try Engine.format_error("Setting render color failed: {*}", sdl.SDL_GetError()));
-            //     return errors.SetRenderColorFailed;
-            // }
-
-            // status = sdl.SDL_RenderClear(self.renderer);
-            // if (status != 0) {
-            //     try logger.err(try Engine.format_error("Clearing renderer failed: {*}", sdl.SDL_GetError()));
-            //     return errors.RenderClearFailed;
-            // }
-
             try self.scene.render();
 
             while (sdl.SDL_PollEvent(&event) != 0) {

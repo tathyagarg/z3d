@@ -26,22 +26,28 @@ pub const Matrix4 = struct {
     pub fn projection_matrix(options: CameraOptions) Matrix4 {
         return Matrix4{ .m = [4][4]f32{
             [4]f32{
-                (2 * options.near_plane) / (options.right - options.left),
+                (2 * options.near_plane) /
+                    (options.points.right - options.points.left),
                 0.0,
-                (options.right + options.left) / (options.right - options.left),
-                0.0,
-            },
-            [4]f32{
-                0.0,
-                (2 * options.near_plane) / (options.top - options.bottom),
-                (options.top + options.bottom) / (options.top - options.bottom),
+                (options.points.right + options.points.left) /
+                    (options.points.right - options.points.left),
                 0.0,
             },
             [4]f32{
                 0.0,
+                (2 * options.near_plane) /
+                    (options.points.top - options.points.bottom),
+                (options.points.top + options.points.bottom) /
+                    (options.points.top - options.points.bottom),
                 0.0,
-                (options.near_plane + options.far_plane) / (options.near_plane - options.far_plane),
-                (2 * options.near_plane * options.far_plane) / (options.near_plane - options.far_plane),
+            },
+            [4]f32{
+                0.0,
+                0.0,
+                (options.near_plane + options.far_plane) /
+                    (options.near_plane - options.far_plane),
+                (2 * options.near_plane * options.far_plane) /
+                    (options.near_plane - options.far_plane),
             },
             [4]f32{
                 0.0,
