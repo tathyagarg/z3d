@@ -2,6 +2,8 @@ const prims = @import("../core/math/primitives.zig");
 const Scene = @import("scene.zig").Scene;
 const ziglog = @import("ziglog");
 const std = @import("std");
+const Shape = @import("../graphics/shape.zig").Shape;
+const Ray = @import("../graphics/ray.zig").Ray;
 
 const constants = @import("../core/constants.zig");
 
@@ -79,7 +81,7 @@ pub const Camera = struct {
             canvas[i] = scene.background_color;
         }
 
-        const options = CameraOptions.init(1.0, 1000.0, canvas_size, 1);
+        const options = CameraOptions.init(0.01, 1000.0, canvas_size, 1);
 
         return Camera{
             .position = prims.Vec3{ .x = 0, .y = 0, .z = 0 },
@@ -91,7 +93,7 @@ pub const Camera = struct {
         };
     }
 
-    pub fn render(self: Camera) ![CANVAS_PIXEL_COUNT]prims.Color4 {
+    pub fn render(self: Camera, shapes: *std.ArrayList(Shape)) ![CANVAS_PIXEL_COUNT]prims.Color4 {
         // const logger = try ziglog.Logger.get(.{ .name = "console" });
 
         const scale_x: f32 = std.math.tan(self.options.fov.x / 2);
@@ -118,15 +120,17 @@ pub const Camera = struct {
                     (@as(f32, @floatFromInt(self.canvas_size.y)) - 1)) *
                     scale_y;
 
-                const unnormalized_direction = (prims.Vec3{ .x = x_coord, .y = y_coord, .z = -1 });
+                const unnormalized_direction = prims.Vec3{ .x = x_coord, .y = y_coord, .z = 1 };
                 const direction = unnormalized_direction.normalize();
+
+                const ray = Ray{ .origin = self.position, .direction = direction };
 
                 // try logger.debug(try std.fmt.allocPrint(
                 //     std.heap.page_allocator,
                 //     "X: {d} Y: {d} P: {d}",
                 //     .{ x, y, x * canvas_y + y },
                 // ));
-                canvas[(x * canvas_y) + y] = try cast_ray(direction);
+                canvas[(x * canvas_y) + y] = try cast_ray(ray, shapes);
             }
         }
 
@@ -134,7 +138,7 @@ pub const Camera = struct {
     }
 };
 
-pub fn cast_ray(direction: prims.Vec3) !prims.Color4 {
+pub fn cast_ray(ray: Ray, shapes: *std.ArrayList(Shape)) !prims.Color4 {
     // const logger = try ziglog.Logger.get(.{ .name = "console" });
     // try logger.debug(try std.fmt.allocPrint(
     //     std.heap.page_allocator,
@@ -142,10 +146,20 @@ pub fn cast_ray(direction: prims.Vec3) !prims.Color4 {
     //     .{ direction.x, direction.y, @abs((2 - (direction.x + direction.y)) * 255) },
     // ));
 
+    for (shapes.items) |shape| {
+        switch (shape) {
+            .triangle => |t| {
+                if (try t.ray_intersects(ray)) {
+                    return t.color;
+                }
+            },
+            else => unreachable,
+        }
+    }
     return prims.Color4{
-        .r = @as(u8, @intFromFloat(direction.x * 255)),
-        .g = @as(u8, @intFromFloat(direction.y * 255)),
-        .b = @as(u8, @intFromFloat(@abs((2 - (direction.x + direction.y)) * 127.5))),
+        .r = @as(u8, @intFromFloat(ray.direction.x * 255)),
+        .g = @as(u8, @intFromFloat(ray.direction.y * 255)),
+        .b = @as(u8, @intFromFloat(@abs((2 - (ray.direction.x + ray.direction.y)) * 127.5))),
         .a = 100,
     };
 }

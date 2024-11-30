@@ -3,6 +3,7 @@ const errors = @import("errors.zig").Errors;
 const prims = @import("math/primitives.zig");
 const Scene = @import("../scene/scene.zig").Scene;
 const constants = @import("constants.zig");
+const Shape = @import("../graphics/shape.zig").Shape;
 
 const sdl = @cImport({
     @cInclude("SDL2/SDL.h");
@@ -61,11 +62,17 @@ pub const Engine = struct {
         return Engine{ .window = window, .renderer = renderer, .scene = try Scene.init(renderer) };
     }
 
+    pub fn add_shape(self: Engine, shape: Shape) !void {
+        try self.scene.add_shape(shape);
+    }
+
     pub fn mainloop(self: *Self) !void {
         self.running = true;
 
         var event: sdl.SDL_Event = undefined;
-        while (self.running) {
+        var i: i32 = 0;
+
+        while (self.running) : (i += 1) {
             try self.scene.render();
 
             while (sdl.SDL_PollEvent(&event) != 0) {
@@ -76,10 +83,13 @@ pub const Engine = struct {
 
             sdl.SDL_RenderPresent(self.renderer);
             sdl.SDL_Delay(constants.FRAME_DELAY);
+
+            if (i == -1) self.running = false;
         }
     }
 
     pub fn deinit(self: *Self) void {
+        self.scene.deinit();
         sdl.SDL_DestroyWindow(self.window);
         sdl.SDL_DestroyRenderer(self.renderer);
         sdl.SDL_Quit();

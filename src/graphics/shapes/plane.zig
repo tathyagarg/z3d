@@ -21,15 +21,15 @@ pub const Plane = struct {
     ///
     /// Learn more:
     /// https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection.html
-    pub fn ray_intersects(self: Plane, ray: Ray) bool {
+    pub fn ray_intersects(self: Plane, ray: Ray) .{ bool, f32 } {
         const denom: f32 = self.normal.dot_product(ray.direction);
         if (denom >= 1e-6) {
             const p0l0: Vec3 = self.origin.subtract(ray.origin);
             const t: f32 = p0l0.dot_product(self.normal) / denom;
 
-            return (t >= 0);
+            return .{ (t >= 0), t };
         }
 
-        return false;
+        return .{ false, 0.0 };
     }
 };

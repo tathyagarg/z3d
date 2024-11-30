@@ -2,6 +2,8 @@ const Camera = @import("camera.zig").Camera;
 const prims = @import("../core/math/primitives.zig");
 const constants = @import("../core/constants.zig");
 const std = @import("std");
+const ArrayList = std.ArrayList;
+const Shape = @import("../graphics/shape.zig").Shape;
 
 const ziglog = @import("ziglog");
 
@@ -15,21 +17,34 @@ pub const Scene = struct {
 
     renderer: *sdl.SDL_Renderer,
 
-    // Change from i32 to object later
-    objects: []i32 = &[_]i32{},
+    shapes: *ArrayList(Shape) = undefined,
+    allocator: *std.heap.GeneralPurposeAllocator(.{}) = undefined,
 
     pub fn init(renderer: *sdl.SDL_Renderer) !Scene {
         var scene = Scene{ .renderer = renderer };
         const camera = try Camera.init(scene);
         scene.camera = camera;
 
+        var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+        const allocator = gpa.allocator();
+        scene.allocator = &gpa;
+
+        var empty_arr = ArrayList(Shape).init(allocator);
+
+        scene.shapes = &empty_arr;
+
         return scene;
+    }
+
+    pub fn deinit(self: Scene) void {
+        self.shapes.deinit();
+        _ = self.allocator.deinit();
     }
 
     pub fn render(self: Scene) !void {
         const logger = try ziglog.Logger.get(.{ .name = "console" });
 
-        for (0.., try self.camera.render()) |i, pixel| {
+        for (0.., try self.camera.render(self.shapes)) |i, pixel| {
             // Debug code: All canvas pixels were defined to have a color of
             // rgba(255, 255, 255, 100). Alteration would mean something is going wrong in
             // the allocation of memory in the canvas array.
@@ -58,5 +73,9 @@ pub const Scene = struct {
                 ));
             }
         }
+    }
+
+    pub fn add_shape(self: Scene, shape: Shape) !void {
+        try self.shapes.append(shape);
     }
 };
