@@ -29,7 +29,7 @@ pub const Scene = struct {
     pub fn render(self: Scene) !void {
         const logger = try ziglog.Logger.get(.{ .name = "console" });
 
-        for (0.., self.camera.canvas) |i, pixel| {
+        for (0.., try self.camera.render()) |i, pixel| {
             // Debug code: All canvas pixels were defined to have a color of
             // rgba(255, 255, 255, 100). Alteration would mean something is going wrong in
             // the allocation of memory in the canvas array.

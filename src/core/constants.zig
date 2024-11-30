@@ -1,4 +1,4 @@
-pub const CANVAS_SIZE_X = 270;
-pub const CANVAS_SIZE_Y = 210;
+pub const CANVAS_SIZE_X = 400;
+pub const CANVAS_SIZE_Y = 400;
 pub const CANVAS_PIXEL_COUNT = CANVAS_SIZE_X * CANVAS_SIZE_Y;
 pub const FRAME_DELAY = 16;
