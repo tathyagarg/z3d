@@ -5,7 +5,7 @@ pub fn build(b: *Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "atom",
+        .name = "z3d",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,

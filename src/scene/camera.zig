@@ -108,8 +108,8 @@ pub const Camera = struct {
         //     .{ canvas_x, canvas_y, CANVAS_PIXEL_COUNT },
         // ));
 
-        for (0..(canvas_x - 1)) |x| {
-            for (0..(canvas_y - 1)) |y| {
+        for (0..canvas_x) |x| {
+            for (0..canvas_y) |y| {
                 const x_coord: f32 = (2 * (@as(f32, @floatFromInt(x)) + 0.5) /
                     (@as(f32, @floatFromInt(self.canvas_size.x)) - 1)) *
                     scale_x;
@@ -138,14 +138,14 @@ pub fn cast_ray(direction: prims.Vec3) !prims.Color4 {
     // const logger = try ziglog.Logger.get(.{ .name = "console" });
     // try logger.debug(try std.fmt.allocPrint(
     //     std.heap.page_allocator,
-    //     "X: {d}",
-    //     .{@as(u8, @intFromFloat(direction.x * 255))},
+    //     "X: {d} Y: {d} P: {d}",
+    //     .{ direction.x, direction.y, @abs((2 - (direction.x + direction.y)) * 255) },
     // ));
 
     return prims.Color4{
         .r = @as(u8, @intFromFloat(direction.x * 255)),
         .g = @as(u8, @intFromFloat(direction.y * 255)),
-        .b = @as(u8, @intFromFloat(direction.z * -255)),
+        .b = @as(u8, @intFromFloat(@abs((2 - (direction.x + direction.y)) * 127.5))),
         .a = 100,
     };
 }
