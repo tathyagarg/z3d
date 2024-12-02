@@ -84,7 +84,7 @@ pub const Camera = struct {
         const options = CameraOptions.init(0.01, 1000.0, canvas_size, 1);
 
         return Camera{
-            .position = prims.Vec3{ .x = 0, .y = 0, .z = 0 },
+            .position = prims.Vec3{ .x = 10, .y = 10, .z = 0 },
             .orientation = prims.Quaternion.identity(),
             .canvas_size = canvas_size,
             .canvas = canvas,
@@ -112,15 +112,19 @@ pub const Camera = struct {
 
         for (0..canvas_x) |x| {
             for (0..canvas_y) |y| {
-                const x_coord: f32 = (2 * (@as(f32, @floatFromInt(x)) + 0.5) /
-                    (@as(f32, @floatFromInt(self.canvas_size.x)) - 1)) *
+                const x_coord: f32 = ((2 * (@as(f32, @floatFromInt(x))) /
+                    @as(f32, @floatFromInt(self.canvas_size.x))) - 1) *
                     scale_x;
 
-                const y_coord: f32 = (2 * (@as(f32, @floatFromInt(y)) + 0.5) /
-                    (@as(f32, @floatFromInt(self.canvas_size.y)) - 1)) *
+                const y_coord: f32 = (1 - (2 * (@as(f32, @floatFromInt(y))) /
+                    @as(f32, @floatFromInt(self.canvas_size.y)))) *
                     scale_y;
 
-                const unnormalized_direction = prims.Vec3{ .x = x_coord, .y = y_coord, .z = 1 };
+                const unnormalized_direction = prims.Vec3{
+                    .x = x_coord,
+                    .y = y_coord,
+                    .z = -1,
+                };
                 const direction = unnormalized_direction.normalize();
 
                 const ray = Ray{ .origin = self.position, .direction = direction };
@@ -150,16 +154,22 @@ pub fn cast_ray(ray: Ray, shapes: *std.ArrayList(Shape)) !prims.Color4 {
         switch (shape) {
             .triangle => |t| {
                 if (try t.ray_intersects(ray)) {
-                    return t.color;
+                    return t.material.color;
+                }
+            },
+            .disk => |d| {
+                if (d.ray_intersects(ray)) {
+                    return d.material.color;
                 }
             },
             else => unreachable,
         }
     }
-    return prims.Color4{
-        .r = @as(u8, @intFromFloat(ray.direction.x * 255)),
-        .g = @as(u8, @intFromFloat(ray.direction.y * 255)),
-        .b = @as(u8, @intFromFloat(@abs((2 - (ray.direction.x + ray.direction.y)) * 127.5))),
-        .a = 100,
-    };
+    return prims.RED;
+    // return prims.Color4{
+    //     .r = @as(u8, @intFromFloat(ray.direction.x * 255)),
+    //     .g = @as(u8, @intFromFloat(ray.direction.y * 255)),
+    //     .b = @as(u8, @intFromFloat(@abs((2 - (ray.direction.x + ray.direction.y)) * 127.5))),
+    //     .a = 100,
+    // };
 }

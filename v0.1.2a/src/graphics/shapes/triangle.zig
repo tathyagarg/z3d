@@ -1,5 +1,5 @@
 const Vec3 = @import("../../core/math/primitives.zig").Vec3;
-const Color4 = @import("../../core/math/primitives.zig").Color4;
+const Material = @import("../material.zig").Material;
 const Ray = @import("../ray.zig").Ray;
 
 const std = @import("std");
@@ -7,7 +7,7 @@ const ziglog = @import("ziglog");
 
 pub const Triangle = struct {
     points: struct { a: Vec3, b: Vec3, c: Vec3 },
-    color: Color4,
+    material: Material,
 
     pub fn normal(self: Triangle) !Vec3 {
         // const logger = try ziglog.Logger.get(.{ .name = "console" });
