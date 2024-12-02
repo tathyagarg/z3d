@@ -1,2 +1,2 @@
-# Z3D
-A primitive 3D game engine written in Zig
+# Atom Simulator
+A 3D application that helps you simulate some atoms and the forces that act on the, written in zig.
