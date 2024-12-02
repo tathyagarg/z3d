@@ -2,4 +2,4 @@ zig-out/
 .zig-cache/
 notes/
 *.note
-.log
+*.log

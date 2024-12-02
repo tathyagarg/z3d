@@ -1,0 +1,1 @@
+I made the Vec3 generic type define its variables with type T instead of *T, so now I have to reinitialize a new struct every time I do an operation.
