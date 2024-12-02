@@ -1,5 +1,8 @@
 const constants = @import("../constants.zig");
-const sqrt = @import("std").math.sqrt;
+const math = @import("std").math;
+const sqrt = math.sqrt;
+const pow = math.pow;
+const Mat4 = @import("./all.zig").Mat4;
 
 pub fn Vec3(comptime T: type) type {
     return packed struct {
@@ -99,6 +102,14 @@ pub fn Vec3(comptime T: type) type {
             return self.add(other.negate());
         }
 
+        pub fn multiply(self: Self, scalar: T) Self {
+            return Self{
+                .x = self.x * scalar,
+                .y = self.y * scalar,
+                .z = self.z * scalar,
+            };
+        }
+
         /// Find the cross product of the given vectors
         /// For two vectors `a` and `b`, the components of the cross product `a x b` are given by:
         /// (a x b).x = (a.y * b.z) - (a.z * b.y)
@@ -126,8 +137,123 @@ pub fn Vec3(comptime T: type) type {
             return sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
         }
 
+        /// Normalizes a vector (gives a vector with length 1)
+        /// The vector `a` is normalized to give vector `a_hat` through:
+        /// a_hat = a / ||a||
         pub fn normalize(self: Self) Self {
+            const len_sqr: T = pow(T, self.norm(), 2);
+            if (len_sqr > 0) {
+                const inv_len: T = 1 / sqrt(len_sqr); // 1 / len, inverted length
+                return self.multiply(inv_len);
+            }
+
             return self;
+        }
+
+        /// Finds the dot product of two vectors
+        /// The dot product of vectors `a` and `b` `<a,b>` is given by:
+        /// <a,b> = (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+        pub fn dot(self: Self, other: Self) T {
+            return (self.x * other.x) +
+                (self.y * other.y) +
+                (self.z * other.z);
+        }
+
+        /// Multiplication of a point with a 4x4 matrix
+        pub fn point_mat_multiplication(self: Self, m: Mat4(T)) Self {
+            const x = self.x * m.ith(0)[0] + self.y * m.ith(1)[0] + self.z * m.ith(2)[0] + m.ith(3)[0];
+            const y = self.x * m.ith(0)[1] + self.y * m.ith(1)[1] + self.z * m.ith(2)[1] + m.ith(3)[1];
+            const z = self.x * m.ith(0)[2] + self.y * m.ith(1)[2] + self.z * m.ith(2)[2] + m.ith(3)[2];
+
+            // Makes this a homogenous point
+            const w: T = self.x * m.ith(0)[3] + self.y * m.ith(1)[3] + self.z * m.ith(2)[3] + m.ith(3)[3];
+            const vec = Self{ .x = x, .y = y, .z = z };
+
+            // We need w = 1, so if it isn't, divide the vec by w.
+            // Obviously, this will fail for w = 0.
+            if (w != 1 and w != 0) {
+                return vec.multiply(1 / w);
+            }
+            return vec;
+        }
+
+        /// Since vectors don't represent a position, their translation is meaningless
+        /// This means we cna forego addition of the m.ith(3)[i] terms.
+        pub fn vec_mat_multiplication(self: Self, m: Mat4(T)) Self {
+            return Self{
+                .x = self.x * m.ith(0)[0] + self.y * m.ith(1)[0] + self.z * m.ith(2)[0],
+                .y = self.x * m.ith(0)[1] + self.y * m.ith(1)[1] + self.z * m.ith(2)[1],
+                .z = self.x * m.ith(0)[2] + self.y * m.ith(1)[2] + self.z * m.ith(2)[2],
+            };
+        }
+
+        /// Converts from spherical coordinates to cartesian coordinates
+        pub fn spherical_to_cartesian(theta: T, phi: T) Self {
+            return Self{
+                .x = @cos(phi) * @sin(theta),
+                .y = @sin(phi) * @sin(theta),
+                .z = @cos(theta),
+            };
+        }
+
+        /// Gets the theta value for spherical coordinates from cartesian coordinates
+        pub fn spherical_theta(self: Self) T {
+            const res = math.acos(self.z);
+            if (res < -1) return -1;
+            if (res > 1) return 1;
+            return res;
+        }
+
+        /// Gets the phi value for spherical coordinates from cartesian coordinates
+        pub fn spherical_phi(self: Self) T {
+            const p = math.atan2(self.y, self.x);
+            return if (p < 0) p + 2 * math.pi else p;
+        }
+
+        pub fn cos_theta(self: Self) T {
+            return self.z;
+        }
+
+        pub fn sin_theta(self: Self) T {
+            return sqrt(1 - pow(T, self.cos_theta(), 2));
+        }
+
+        pub fn cos_phi(self: Self) T {
+            const st = self.sin_theta();
+            if (st == 0) return 1;
+
+            const temp = self.x / st;
+
+            if (temp < -1) return -1;
+            if (temp > 1) return 1;
+            return temp;
+        }
+
+        pub fn sin_phi(self: Self) T {
+            const st = self.sin_theta();
+            if (st == 0) return 1;
+
+            const temp = self.y / st;
+
+            if (temp < -1) return -1;
+            if (temp > 1) return 1;
+            return temp;
+        }
+
+        /// Creates a coordinate system given `n`, where:
+        /// `n` is a normal,
+        /// `t` is the tangent,
+        /// `b` is the bitangent
+        pub fn coordinate_system(n: Self, t: *Self, b: *Self) void {
+            t.* = if (@abs(n.x) > @abs(n.y)) {
+                const inv_len = sqrt(n.x * n.x + n.z * n.z);
+                return Self{ .x = n.z * inv_len, .y = 0, .z = -n.x * inv_len };
+            } else {
+                const inv_len = sqrt(n.y * n.y + n.z * n.z);
+                return Self{ .x = 0, .y = -n.z * inv_len, .z = n.y * inv_len };
+            };
+
+            b.* = n.cross(t.*);
         }
     };
 }
