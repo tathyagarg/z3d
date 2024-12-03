@@ -1,5 +1,6 @@
 pub const utilslib = @import("utils.zig");
 pub const appropriate_division = utilslib.appropriate_division;
+pub const PixelComputationOptions = utilslib.PixelComputationOptions;
 
 // A 3 dimensional vector
 // Can be used to represent direction, a point, etc.
@@ -19,3 +20,5 @@ pub const Vec2lib = @import("vec2.zig");
 pub const Vec2 = Vec2lib.Vec2;
 pub const Vec2f32 = Vec2lib.Vec2f32;
 pub const Vec2i32 = Vec2lib.Vec2i32;
+
+pub const INCH_TO_MM = 25.4;

@@ -1,11 +1,15 @@
-const constants = @import("../constants.zig");
-const appropriate_division = @import("./all.zig").appropriate_division;
 const std = @import("std");
+const all = @import("all.zig");
+const constants = @import("../constants.zig");
+
+const Mat4 = all.Mat4;
+const Vec2 = all.Vec2;
+const appropriate_division = all.appropriate_division;
+const PixelComputationOptions = all.PixelComputationOptions;
+
 const math = @import("std").math;
 const sqrt = math.sqrt;
 const pow = math.pow;
-const Mat4 = @import("./all.zig").Mat4;
-const Vec2 = @import("./all.zig").Vec2;
 
 pub fn Vec3(comptime T: type) type {
     return packed struct {
@@ -253,28 +257,28 @@ pub fn Vec3(comptime T: type) type {
         pub fn compute_pixel_coords(
             self: Self,
             world_to_camera: Mat4(T),
-            consts: anytype,
-        ) !Vec2(u32) {
+            options: PixelComputationOptions,
+        ) !struct {
+            raster: Vec2(i32),
+            visible: bool,
+        } {
             const camera_space = self.point_mat_multiplication(world_to_camera);
-            const x_proj = try camera_space.x_projection();
-            const y_proj = try camera_space.y_projection();
+            const screen_space_x = try camera_space.x_projection() * options.near;
+            const screen_space_y = try camera_space.y_projection() * options.near;
 
-            const screen_space = Vec2(T){
-                .x = x_proj,
-                .y = y_proj,
-            };
+            const ndc_space_x = (screen_space_x + options.right) / (2 * options.right);
+            const ndc_space_y = (screen_space_y + options.top) / (2 * options.top);
 
-            const ndc_space = Vec2(T){
-                .x = (screen_space.x + consts.canvas_width * 0.5) /
-                    consts.canvas_width,
-                .y = (screen_space.y + consts.canvas_height * 0.5) /
-                    consts.canvas_height,
-            };
+            const raster_x = @as(i32, @intFromFloat(ndc_space_x * @as(f32, @floatFromInt(options.screen_width))));
+            const raster_y = @as(i32, @intFromFloat((1 - ndc_space_y) * @as(f32, @floatFromInt(options.screen_height))));
+            const raster = Vec2(i32){ .x = raster_x, .y = raster_y };
 
-            return Vec2(u32){
-                .x = @as(u32, @intFromFloat(ndc_space.x * consts.screen_width)),
-                .y = @as(u32, @intFromFloat((1 - ndc_space.y) * consts.screen_height)),
-            };
+            const visible = !(screen_space_x < options.left or
+                screen_space_x > options.right or
+                screen_space_y < options.bottom or
+                screen_space_y > options.top);
+
+            return .{ .raster = raster, .visible = visible };
         }
     };
 }
