@@ -1,8 +1,11 @@
 const constants = @import("../constants.zig");
+const appropriate_division = @import("./all.zig").appropriate_division;
+const std = @import("std");
 const math = @import("std").math;
 const sqrt = math.sqrt;
 const pow = math.pow;
 const Mat4 = @import("./all.zig").Mat4;
+const Vec2 = @import("./all.zig").Vec2;
 
 pub fn Vec3(comptime T: type) type {
     return packed struct {
@@ -37,12 +40,7 @@ pub fn Vec3(comptime T: type) type {
         /// x_proj is in the range [-1, 1] and is in screen space
         pub fn x_projection(self: Self) error{ZisZero}!T {
             if (self.z == 0) return error.ZisZero;
-
-            return switch (@typeInfo(T)) {
-                .int => @divTrunc(self.x, -self.z),
-                .float => self.x / -self.z,
-                else => unreachable,
-            };
+            return appropriate_division(T, self.x, -self.z);
         }
 
         /// Returns the y-projection of a point
@@ -50,12 +48,7 @@ pub fn Vec3(comptime T: type) type {
         /// y_proj is in the range [-1, 1] and is in screen space
         pub fn y_projection(self: Self) error{ZisZero}!T {
             if (self.z == 0) return error.ZisZero;
-
-            return switch (@typeInfo(T)) {
-                .int => @divTrunc(self.y, -self.z),
-                .float => self.y / -self.z,
-                else => unreachable,
-            };
+            return appropriate_division(T, self.y, -self.z);
         }
 
         /// Returns the remapped x-projection of a point
@@ -254,6 +247,34 @@ pub fn Vec3(comptime T: type) type {
             };
 
             b.* = n.cross(t.*);
+        }
+
+        /// self is a point in world space which is converted into a point in raster space
+        pub fn compute_pixel_coords(
+            self: Self,
+            world_to_camera: Mat4(T),
+            consts: anytype,
+        ) !Vec2(u32) {
+            const camera_space = self.point_mat_multiplication(world_to_camera);
+            const x_proj = try camera_space.x_projection();
+            const y_proj = try camera_space.y_projection();
+
+            const screen_space = Vec2(T){
+                .x = x_proj,
+                .y = y_proj,
+            };
+
+            const ndc_space = Vec2(T){
+                .x = (screen_space.x + consts.canvas_width * 0.5) /
+                    consts.canvas_width,
+                .y = (screen_space.y + consts.canvas_height * 0.5) /
+                    consts.canvas_height,
+            };
+
+            return Vec2(u32){
+                .x = @as(u32, @intFromFloat(ndc_space.x * consts.screen_width)),
+                .y = @as(u32, @intFromFloat((1 - ndc_space.y) * consts.screen_height)),
+            };
         }
     };
 }

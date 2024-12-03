@@ -18,4 +18,6 @@ test "all" {
     _ = @import("geometry/subtraction.zig");
     _ = @import("geometry/cross_product.zig");
     _ = @import("geometry/change_handedness.zig");
+
+    _ = @import("computing_pixel_coords.zig");
 }
