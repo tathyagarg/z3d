@@ -15,6 +15,15 @@ pub fn Mat4(comptime T: type) type {
             } };
         }
 
+        pub fn empty() Self {
+            return Self{ .m = [4][4]T{
+                .{ 0, 0, 0, 0 },
+                .{ 0, 0, 0, 0 },
+                .{ 0, 0, 0, 0 },
+                .{ 0, 0, 0, 0 },
+            } };
+        }
+
         pub fn from(m: [4][4]T) Self {
             return Self{ .m = m };
         }

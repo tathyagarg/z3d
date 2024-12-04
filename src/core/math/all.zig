@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const utilslib = @import("utils.zig");
 pub const appropriate_division = utilslib.appropriate_division;
 pub const PixelComputationOptions = utilslib.PixelComputationOptions;
@@ -23,3 +25,4 @@ pub const Vec2f32 = Vec2lib.Vec2f32;
 pub const Vec2i32 = Vec2lib.Vec2i32;
 
 pub const INCH_TO_MM = 25.4;
+pub const DEG_TO_RAD: f32 = std.math.pi / @as(f32, @floatFromInt(180));

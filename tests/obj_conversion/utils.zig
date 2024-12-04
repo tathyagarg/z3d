@@ -16,9 +16,17 @@ pub const TEXTURE_TYPE: type = f32;
 pub const Vec3Vertex = Vec3(VERTEX_TYPE);
 pub const Vec2Texture = Vec2(TEXTURE_TYPE);
 
+pub const IgnoreOptions = packed struct {
+    v: bool = false,
+    vn: bool = false,
+    vt: bool = false,
+    f: bool = false,
+};
+
 pub fn fetch_data(
     source_file: []const u8,
     allocator: std.mem.Allocator,
+    ignore: IgnoreOptions,
 ) !struct {
     vertices: ArrayList(Vec3Vertex),
     faces: ArrayList(Vec3(usize)),
@@ -46,14 +54,14 @@ pub fn fetch_data(
         var line_iterator = std.mem.splitScalar(u8, buffer[0..MAX_LINE_LEN], 32); // 32 = space
         const line_type = line_iterator.next().?;
 
-        if (std.mem.eql(u8, line_type, "v")) {
+        if (std.mem.eql(u8, line_type, "v") and !ignore.v) {
             // Handle vertex
             const x = try std.fmt.parseFloat(VERTEX_TYPE, line_iterator.next().?);
             const y = try std.fmt.parseFloat(VERTEX_TYPE, line_iterator.next().?);
             const z = try std.fmt.parseFloat(VERTEX_TYPE, line_iterator.next().?);
 
             try vertices.append(Vec3Vertex.init(x, y, z));
-        } else if (std.mem.eql(u8, line_type, "f")) {
+        } else if (std.mem.eql(u8, line_type, "f") and !ignore.f) {
             // Handle face
             // 47 stands for /
             var pre_x = std.mem.splitScalar(u8, line_iterator.next().?, 47);
@@ -71,7 +79,7 @@ pub fn fetch_data(
             // Subtract 1 from all to turn them into 0-indexed values that can be used to easily index the vertices arraylist.
             try faces.append(Vec3(usize).init(x - 1, y - 1, z - 1));
             try face_textures.append(Vec3(usize).init(xt - 1, yt - 1, zt - 1));
-        } else if (std.mem.eql(u8, line_type, "vt")) {
+        } else if (std.mem.eql(u8, line_type, "vt") and !ignore.vt) {
             const u = try std.fmt.parseFloat(TEXTURE_TYPE, line_iterator.next().?);
             const v = try std.fmt.parseFloat(TEXTURE_TYPE, line_iterator.next().?);
 

@@ -6,7 +6,6 @@ const _Mat4 = z3d.math.Mat4;
 const Vec3Vertex = utils.Vec3Vertex;
 const Vec2Texture = utils.Vec2Texture;
 
-const line_string = utils.LINE_STRING;
 const allocator = std.testing.allocator;
 const Mat4 = _Mat4(utils.VERTEX_TYPE);
 const RGB = z3d.graphics.types.RGB;
@@ -181,10 +180,10 @@ test "rasterization" {
     var outputs = try std.fs.cwd().openDir("tests/outputs", .{});
     defer outputs.close();
 
-    const svg = try outputs.createFile("cow.ppm", .{});
-    defer svg.close();
+    const ppm = try outputs.createFile("cow.ppm", .{});
+    defer ppm.close();
 
-    _ = try svg.write("P6\n");
+    _ = try ppm.write("P6\n");
 
     const line_2 = try std.fmt.allocPrint(
         allocator,
@@ -196,9 +195,9 @@ test "rasterization" {
     );
     defer allocator.free(line_2);
 
-    _ = try svg.write(line_2);
+    _ = try ppm.write(line_2);
     for (frame_buffer) |pixel| {
         const arr = [3]u8{ pixel.r, pixel.g, pixel.b };
-        _ = try svg.write(&arr);
+        _ = try ppm.write(&arr);
     }
 }

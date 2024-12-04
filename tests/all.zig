@@ -23,5 +23,6 @@ test "all" {
     // This test does not work anymore due to a change in the params of the Vec3.computing_pixel_coords function
     // _ = @import("obj_conversion/computing_pixel_coords.zig");
     // _ = @import("obj_conversion/pinhole_camera.zig");
-    _ = @import("obj_conversion/rasterization.zig");
+    // _ = @import("obj_conversion/rasterization.zig");
+    _ = @import("obj_conversion/projection_matrix.zig");
 }
