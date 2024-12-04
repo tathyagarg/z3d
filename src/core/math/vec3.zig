@@ -130,7 +130,7 @@ pub fn Vec3(comptime T: type) type {
         /// Gets the length of the vector, also referred to as the norm or magnitude of the vector
         /// The norm of a vector `a` is given by:
         /// ||a|| = sqrt(a.x^2 + a.y^2 + a.z^2)
-        pub fn norm(self: Self) Self {
+        pub fn norm(self: Self) T {
             return sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
         }
 
@@ -254,31 +254,30 @@ pub fn Vec3(comptime T: type) type {
         }
 
         /// self is a point in world space which is converted into a point in raster space
-        pub fn compute_pixel_coords(
+        pub fn convert_to_raster(
             self: Self,
             world_to_camera: Mat4(T),
             options: PixelComputationOptions,
-        ) !struct {
-            raster: Vec2(i32),
-            visible: bool,
-        } {
+        ) !Self {
             const camera_space = self.point_mat_multiplication(world_to_camera);
             const screen_space_x = try camera_space.x_projection() * options.near;
             const screen_space_y = try camera_space.y_projection() * options.near;
 
-            const ndc_space_x = (screen_space_x + options.right) / (2 * options.right);
-            const ndc_space_y = (screen_space_y + options.top) / (2 * options.top);
+            // NDC space is in the range [-1, 1]
+            const ndc_space_x = 2 * screen_space_x / (options.right - options.left) -
+                (options.right + options.left) / (options.right - options.left);
+            const ndc_space_y = 2 * screen_space_y / (options.top - options.bottom) -
+                (options.top + options.bottom) / (options.top - options.bottom);
 
-            const raster_x = @as(i32, @intFromFloat(ndc_space_x * @as(f32, @floatFromInt(options.screen_width))));
-            const raster_y = @as(i32, @intFromFloat((1 - ndc_space_y) * @as(f32, @floatFromInt(options.screen_height))));
-            const raster = Vec2(i32){ .x = raster_x, .y = raster_y };
+            const raster_x = @as(T, @floatFromInt(options.screen_width)) * (ndc_space_x + 1) / 2;
+            const raster_y = @as(T, @floatFromInt(options.screen_height)) * (1 - ndc_space_y) / 2;
+            const raster = Self{
+                .x = raster_x,
+                .y = raster_y,
+                .z = -camera_space.z,
+            };
 
-            const visible = !(screen_space_x < options.left or
-                screen_space_x > options.right or
-                screen_space_y < options.bottom or
-                screen_space_y > options.top);
-
-            return .{ .raster = raster, .visible = visible };
+            return raster;
         }
     };
 }
@@ -286,3 +285,7 @@ pub fn Vec3(comptime T: type) type {
 // Preset Vec3 types
 pub const Vec3i32 = Vec3(i32);
 pub const Vec3f32 = Vec3(f32);
+
+pub fn edge_function(comptime T: type, v0: Vec3(T), v1: Vec3(T), v2: Vec3(T)) T {
+    return (v2.x - v0.x) * (v1.y - v0.y) - (v2.y - v0.y) * (v1.x - v0.x);
+}

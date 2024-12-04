@@ -16,6 +16,20 @@ pub fn Vec2(comptime T: type) type {
         pub fn init(x: T, y: T) Self {
             return Self{ .x = x, .y = y };
         }
+
+        pub fn multiply(self: Self, scalar: T) Self {
+            return Self{
+                .x = self.x * scalar,
+                .y = self.y * scalar,
+            };
+        }
+
+        pub fn add(self: Self, other: Self) Self {
+            return Self{
+                .x = self.x + other.x,
+                .y = self.y + other.y,
+            };
+        }
     };
 }
 
