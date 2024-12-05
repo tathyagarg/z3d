@@ -279,6 +279,18 @@ pub fn Vec3(comptime T: type) type {
 
             return raster;
         }
+
+        pub fn direct_multiplication(self: Self, other: Self) Self {
+            return Self{
+                .x = self.x * other.x,
+                .y = self.y * other.y,
+                .z = self.z * other.z,
+            };
+        }
+
+        pub fn mix(self: Self, other: Self, ratio: f32) Self {
+            return self.multiply(1 - ratio).add(other.multiply(ratio));
+        }
     };
 }
 

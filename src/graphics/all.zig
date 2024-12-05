@@ -1,8 +1,8 @@
 pub const utilslib = @import("utils.zig");
 pub const FitResolutionGate = utilslib.FitResolutionGate;
 pub const compute_screen_coordinates = utilslib.compute_screen_coordinates;
-
-pub const types = @import("types/all.zig");
+pub const RayCastingOptions = utilslib.RayCastingOptions;
+pub const cast_ray = utilslib.cast_ray;
 
 const math = @import("../core/math/all.zig");
 const Mat4f32 = math.Mat4f32;
@@ -28,3 +28,8 @@ pub fn projection_matrix_factory(
 
     return Factory.factory;
 }
+
+pub const objects = @import("objects/object.zig");
+pub const Light = @import("light.zig").Light;
+pub const material = @import("material.zig");
+pub const Ray = @import("ray.zig").Ray;

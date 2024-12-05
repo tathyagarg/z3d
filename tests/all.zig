@@ -25,4 +25,7 @@ test "all" {
     // _ = @import("obj_conversion/pinhole_camera.zig");
     // _ = @import("obj_conversion/rasterization.zig");
     _ = @import("obj_conversion/projection_matrix.zig");
+
+    // Ray casting
+    _ = @import("ray-casting/whitted.zig");
 }

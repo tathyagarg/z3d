@@ -8,7 +8,6 @@ const Vec2Texture = utils.Vec2Texture;
 
 const allocator = std.testing.allocator;
 const Mat4 = _Mat4(utils.VERTEX_TYPE);
-const RGB = z3d.graphics.types.RGB;
 
 const focal_length = 20; // in mm
 const film_aperture_width = 0.980; // in in.
