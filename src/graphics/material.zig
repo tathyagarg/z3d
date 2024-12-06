@@ -1,4 +1,7 @@
-const Vec3 = @import("../core/math/all.zig").Vec3f32;
+const float = @import("../core/constants.zig").FLOAT;
+
+const Vec3 = @import("../core/math/all.zig").Vec3;
+const Vec3f = Vec3(float);
 
 pub const MaterialType = enum {
     DIFFUSE_AND_GLOSSY,
@@ -8,9 +11,9 @@ pub const MaterialType = enum {
 
 pub const Material = struct {
     material_type: MaterialType = .DIFFUSE_AND_GLOSSY,
-    ior: f32 = 1.3,
-    kd: f32 = 0.8,
-    ks: f32 = 0.2,
-    diffuse_color: Vec3 = Vec3.diagonal(0.2),
-    specular_exponent: f32 = 25,
+    ior: float = 1.3,
+    kd: float = 0.8,
+    ks: float = 0.2,
+    diffuse_color: Vec3f = Vec3f.diagonal(0.2),
+    specular_exponent: float = 25,
 };

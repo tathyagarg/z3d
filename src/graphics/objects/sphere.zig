@@ -1,20 +1,27 @@
-const Vec3 = @import("../../core/math/all.zig").Vec3f32;
-const Vec2 = @import("../../core/math/all.zig").Vec2f32;
+const math = @import("../../core/math/all.zig");
+const float = @import("../../core/constants.zig").FLOAT;
+
+const Vec3 = math.Vec3;
+const Vec2 = math.Vec2;
+
+const Vec3f = math.Vec3(float);
+const Vec2f = math.Vec2(float);
+
 const Ray = @import("../ray.zig").Ray;
 const ArrayList = @import("std").ArrayList;
 const Material = @import("../material.zig").Material;
 
-const solve_quadratic = @import("../../core/math/all.zig").solve_quadratic;
+const solve_quadratic = math.solve_quadratic;
 
 pub const Sphere = struct {
-    center: Vec3,
-    radius: f32,
-    radius_sqr: f32 = undefined,
+    center: Vec3f,
+    radius: float,
+    radius_sqr: float = undefined,
     material: Material,
 
     const Self = @This();
 
-    pub fn init(c: Vec3, r: f32, material: Material) Self {
+    pub fn init(c: Vec3f, r: float, material: Material) Self {
         return Self{
             .center = c,
             .radius = r,
@@ -23,14 +30,14 @@ pub const Sphere = struct {
         };
     }
 
-    pub fn intersects(self: Self, ray: Ray, t: *f32) bool {
-        const L = ray.origin.subtract(self.center);
-        const a = ray.direction.dot(ray.direction);
-        const b = 2 * ray.direction.dot(L);
-        const c = L.dot(L) - self.radius_sqr;
+    pub fn intersects(self: Self, ray: Ray, t: *float) bool {
+        const L: Vec3f = ray.origin.subtract(self.center);
+        const a: float = ray.direction.dot(ray.direction);
+        const b: float = 2 * ray.direction.dot(L);
+        const c: float = L.dot(L) - self.radius_sqr;
 
-        var t0: f32 = undefined;
-        var t1: f32 = undefined;
+        var t0: float = undefined;
+        var t1: float = undefined;
 
         if (!solve_quadratic(a, b, c, &t0, &t1)) return false;
 
@@ -43,12 +50,12 @@ pub const Sphere = struct {
 
     pub fn get_surface_props(
         self: Self,
-        P: *const Vec3,
-        I: *const Vec3,
+        P: *const Vec3f,
+        I: *const Vec3f,
         index: usize,
-        uv: *Vec2,
-        normal: *Vec3,
-        st: *Vec2,
+        uv: *Vec2f,
+        normal: *Vec3f,
+        st: *Vec2f,
     ) void {
         normal.* = (P.subtract(self.center)).normalize();
         _ = .{ I, index, uv, st };

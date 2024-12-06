@@ -1,6 +1,9 @@
-const Vec3 = @import("../core/math/all.zig").Vec3f32;
+const float = @import("../core/constants.zig").FLOAT;
+
+const Vec3 = @import("../core/math/all.zig").Vec3;
+const Vec3f = Vec3(float);
 
 pub const Light = struct {
-    position: Vec3,
-    intensity: Vec3,
+    position: Vec3f,
+    intensity: Vec3f,
 };

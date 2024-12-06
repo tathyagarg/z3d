@@ -1,10 +1,16 @@
 const std = @import("std");
 const math = @import("../core/math/all.zig");
+const float = @import("../core/constants.zig").FLOAT;
 const Ray = @import("ray.zig").Ray;
 const Object = @import("objects/object.zig").Object;
 const Light = @import("light.zig").Light;
-const Vec3 = @import("../core/math/all.zig").Vec3;
-const Vec2 = @import("../core/math/all.zig").Vec2;
+
+const Vec3 = math.Vec3;
+const Vec2 = math.Vec2;
+
+const Vec3f = math.Vec3(float);
+const Vec2f = math.Vec2(float);
+
 const ArrayList = @import("std").ArrayList;
 
 pub const FitResolutionGate = enum {
@@ -13,30 +19,30 @@ pub const FitResolutionGate = enum {
 };
 
 pub fn compute_screen_coordinates(
-    aperture_width: f32,
-    aperture_height: f32,
-    screen_width: u32,
-    screen_height: u32,
+    aperture_width: float,
+    aperture_height: float,
+    screen_width: usize,
+    screen_height: usize,
     fit: FitResolutionGate,
-    near: f32,
-    focal_length: f32,
+    near: float,
+    focal_length: float,
 ) struct {
-    top: f32,
-    right: f32,
-    bottom: f32,
-    left: f32,
+    top: float,
+    right: float,
+    bottom: float,
+    left: float,
 } {
-    const film_aspect_ratio = aperture_width / aperture_height;
-    const device_aspect_ratio = @as(f32, @floatFromInt(screen_width)) /
-        @as(f32, @floatFromInt(screen_height));
+    const film_aspect_ratio: float = aperture_width / aperture_height;
+    const device_aspect_ratio: float = @as(float, @floatFromInt(screen_width)) /
+        @as(float, @floatFromInt(screen_height));
 
-    const two: f32 = 2;
+    const two: float = 2;
 
-    var top = @as(f32, @floatCast((aperture_height * (math.INCH_TO_MM / two)) / focal_length * near));
-    var right = @as(f32, @floatCast((aperture_width * (math.INCH_TO_MM / two)) / focal_length * near));
+    var top: float = @as(float, @floatCast((aperture_height * (math.INCH_TO_MM / two)) / focal_length * near));
+    var right: float = @as(float, @floatCast((aperture_width * (math.INCH_TO_MM / two)) / focal_length * near));
 
-    var xscale: f32 = 1;
-    var yscale: f32 = 1;
+    var xscale: float = 1;
+    var yscale: float = 1;
 
     switch (fit) {
         .kFill => {
@@ -58,8 +64,8 @@ pub fn compute_screen_coordinates(
     right *= xscale;
     top *= yscale;
 
-    const bottom = -top;
-    const left = -right;
+    const bottom: float = -top;
+    const left: float = -right;
 
     return .{
         .top = top,
@@ -70,12 +76,12 @@ pub fn compute_screen_coordinates(
 }
 
 pub const RayCastingOptions = struct {
-    width: u32,
-    height: u32,
-    fov: f32,
-    max_depth: u32,
-    background_color: Vec3(f32),
-    bias: f32,
+    width: usize,
+    height: usize,
+    fov: float,
+    max_depth: usize,
+    background_color: Vec3f,
+    bias: float,
 };
 
 pub fn cast_ray(
@@ -83,26 +89,31 @@ pub fn cast_ray(
     objects: ArrayList(Object),
     lights: ArrayList(Light),
     options: RayCastingOptions,
-    depth: u32,
+    depth: usize,
     x: usize,
     y: usize,
-) Vec3(f32) {
+) Vec3f {
+    // ========================= DO NOT TOUCH ==========================
+    // I have no idea on what the fuck it does and how the fuck it works.
+    // Please, spare yourself the kajillion debugging hours.
+    // =================================================================
+
     if (depth > options.max_depth) {
         return options.background_color;
     }
 
-    var hit_color = options.background_color;
-    var t_near: f32 = std.math.inf(f32);
-    var uv: math.Vec2f32 = undefined;
+    var hit_color: Vec3f = options.background_color;
+    var t_near: float = std.math.inf(float);
+    var uv: Vec2f = undefined;
     var index: usize = 0;
 
     var hit_object: Object = undefined;
-    var hit = false;
+    var hit: bool = false;
     if (ray.trace(&objects, &t_near, &index, &uv, &hit_object)) {
         hit = true;
-        const hit_point = ray.at(t_near);
-        var normal: math.Vec3f32 = undefined;
-        var texture: math.Vec2f32 = undefined;
+        const hit_point: Vec3f = ray.at(t_near);
+        var normal: Vec3f = undefined;
+        var texture: Vec2f = undefined;
         hit_object.get_surface_props(
             &hit_point,
             &ray.direction,
@@ -151,12 +162,12 @@ pub fn cast_ray(
                     y,
                 );
 
-                var kr: f32 = undefined;
+                var kr: float = undefined;
                 ray.fresnel(normal, material.ior, &kr);
                 hit_color = reflection_color.mix(refraction_color, 1 - kr);
             },
             .REFLECTION => {
-                var kr: f32 = undefined;
+                var kr: float = undefined;
                 ray.fresnel(normal, material.ior, &kr);
 
                 const reflection_direction = ray.reflection(normal);
@@ -176,8 +187,8 @@ pub fn cast_ray(
                 ).multiply(kr);
             },
             .DIFFUSE_AND_GLOSSY => {
-                var light_amount: Vec3(f32) = Vec3(f32).zero();
-                var specular_color: Vec3(f32) = Vec3(f32).zero();
+                var light_amount: Vec3f = Vec3f.zero();
+                var specular_color: Vec3f = Vec3f.zero();
 
                 const shadow_point_origin = if (ray.direction.dot(normal) < 0) hit_point.add(normal.multiply(options.bias)) else hit_point.subtract(normal.multiply(options.bias));
                 for (lights.items) |light| {
@@ -187,7 +198,7 @@ pub fn cast_ray(
                     light_direction = light_direction.normalize();
                     const LdotN = @max(0, light_direction.dot(normal));
                     var shadow_hit_obj: Object = undefined;
-                    var t_near_shadow: f32 = std.math.inf(f32);
+                    var t_near_shadow: float = std.math.inf(float);
 
                     const in_shadow = @intFromBool((Ray{
                         .origin = shadow_point_origin,
@@ -203,13 +214,13 @@ pub fn cast_ray(
                     light_amount = light_amount
                         .add(light.intensity
                         .multiply(LdotN)
-                        .multiply(@as(f32, @floatFromInt(1 - in_shadow))));
-                    const pre_reflection_direction = Ray{ .origin = Vec3(f32).zero(), .direction = light_direction.negate() };
+                        .multiply(@as(float, @floatFromInt(1 - in_shadow))));
+                    const pre_reflection_direction = Ray{ .origin = Vec3f.zero(), .direction = light_direction.negate() };
                     const reflection_direction = pre_reflection_direction.reflection(normal);
                     specular_color = specular_color.add(
                         light.intensity.multiply(
                             std.math.pow(
-                                f32,
+                                float,
                                 @max(0, -reflection_direction.dot(ray.direction)),
                                 hit_object.get_material().specular_exponent,
                             ),
