@@ -43,7 +43,7 @@ pub const MeshTriangle = struct {
             f32,
             @floatFromInt(
                 @as(u8, @intFromBool(@mod(texture.x * scale, 1) > 0.5)) ^
-                    @as(u8, @intFromBool(@mod(texture.y, 1) > 0.5)),
+                    @as(u8, @intFromBool(@mod(texture.y * scale, 1) > 0.5)),
             ),
         );
 

@@ -117,8 +117,6 @@ pub const Ray = struct {
         index: *usize,
         uv: *Vec2,
         hit_object: *Object,
-        x: usize,
-        y: usize,
     ) bool {
         hit_object.* = undefined;
         var hit = false;
@@ -140,13 +138,6 @@ pub const Ray = struct {
 
                 hit = true;
             }
-            if (x == 320 and y == 218)
-                std.debug.print("BAKCHODI: {d} {d} {d} {d}\n", .{
-                    t_near.*,
-                    index.*,
-                    @as(u1, @intFromBool(intersects)),
-                    t_near_k,
-                });
         }
 
         return hit;

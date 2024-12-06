@@ -98,7 +98,7 @@ pub fn cast_ray(
 
     var hit_object: Object = undefined;
     var hit = false;
-    if (ray.trace(&objects, &t_near, &index, &uv, &hit_object, x, y)) {
+    if (ray.trace(&objects, &t_near, &index, &uv, &hit_object)) {
         hit = true;
         const hit_point = ray.at(t_near);
         var normal: math.Vec3f32 = undefined;
@@ -153,7 +153,7 @@ pub fn cast_ray(
 
                 var kr: f32 = undefined;
                 ray.fresnel(normal, material.ior, &kr);
-                hit_color = reflection_color.mix(refraction_color, kr);
+                hit_color = reflection_color.mix(refraction_color, 1 - kr);
             },
             .REFLECTION => {
                 var kr: f32 = undefined;
@@ -187,7 +187,7 @@ pub fn cast_ray(
                     light_direction = light_direction.normalize();
                     const LdotN = @max(0, light_direction.dot(normal));
                     var shadow_hit_obj: Object = undefined;
-                    var t_near_shadow: f32 = undefined;
+                    var t_near_shadow: f32 = std.math.inf(f32);
 
                     const in_shadow = @intFromBool((Ray{
                         .origin = shadow_point_origin,
@@ -198,8 +198,6 @@ pub fn cast_ray(
                         &index,
                         &uv,
                         &shadow_hit_obj,
-                        x,
-                        y,
                     ) and (t_near_shadow * t_near_shadow < light_dist_sqr));
 
                     light_amount = light_amount
@@ -225,15 +223,6 @@ pub fn cast_ray(
                     .add(specular_color.multiply(material.ks));
             },
         }
-    }
-    if (hit and x == 320 and y == 218) {
-        std.debug.print("{any} {d} {d} {d} {d}\n", .{
-            hit_object.get_material().material_type,
-            hit_color.x,
-            hit_color.y,
-            hit_color.z,
-            depth,
-        });
     }
 
     return hit_color;
