@@ -16,16 +16,16 @@ const ArrayList = std.ArrayList;
 const allocator: std.mem.Allocator = std.testing.allocator;
 
 fn render(
-    options: RayCastingOptions,
-    objects: ArrayList(Object),
-    lights: ArrayList(Light),
+    options: *const RayCastingOptions,
+    objects: *ArrayList(Object),
+    lights: *ArrayList(Light),
 ) !void {
     var frame_buffer = try allocator.alloc(Vec3, @sizeOf(Vec3) * options.width * options.height);
     defer allocator.free(frame_buffer);
 
     const scale = @tan(z3d.math.DEG_TO_RAD * options.fov * 0.5);
     const screen_aspect_ratio = @as(f32, @floatFromInt(options.width)) / @as(f32, @floatFromInt(options.height));
-    const origin = z3d.math.Vec3f32.zero();
+    const origin = z3d.math.Vec3f32.diagonal(-1);
 
     for (0..options.height) |j| {
         for (0..options.width) |i| {
@@ -40,8 +40,6 @@ fn render(
                 lights,
                 options,
                 0,
-                i,
-                j,
             );
         }
     }
@@ -49,7 +47,7 @@ fn render(
     var outputs = try std.fs.cwd().openDir("tests/outputs", .{});
     defer outputs.close();
 
-    const ppm = try outputs.createFile("out.ppm", .{});
+    const ppm = try outputs.createFile("whitted.ppm", .{});
     defer ppm.close();
 
     _ = try ppm.write("P6\n");
@@ -92,7 +90,7 @@ test "whitted ray casting" {
     ) };
 
     const sph2 = Object{ .sphere = objectslib.Sphere.init(
-        Vec3.init(0.5, -0.5, -8),
+        Vec3.init(0.5, -1.5, -8),
         1.5,
         material.Material{
             .ior = 1.5,
@@ -149,5 +147,5 @@ test "whitted ray casting" {
         .bias = 0.00001,
     };
 
-    try render(options, objects, lights);
+    try render(&options, &objects, &lights);
 }

@@ -49,3 +49,11 @@ pub fn solve_quadratic(a: f32, b: f32, c: f32, x0: *f32, x1: *f32) bool {
 
     return true;
 }
+
+pub fn rgb_to_vec3f(comptime T: type, r: u8, g: u8, b: u8) Vec3(T) {
+    return Vec3(T).init(
+        @as(T, @floatFromInt(r)) / 255,
+        @as(T, @floatFromInt(g)) / 255,
+        @as(T, @floatFromInt(b)) / 255,
+    );
+}

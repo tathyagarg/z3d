@@ -76,22 +76,21 @@ pub fn compute_screen_coordinates(
 }
 
 pub const RayCastingOptions = struct {
-    width: usize,
-    height: usize,
-    fov: float,
-    max_depth: usize,
-    background_color: Vec3f,
-    bias: float,
+    width: usize = 400,
+    height: usize = 400,
+    // In degrees
+    fov: float = 90,
+    max_depth: usize = 5,
+    background_color: Vec3f = math.rgb_to_vec3f(float, 250, 249, 246),
+    bias: float = 0.00001,
 };
 
 pub fn cast_ray(
     ray: Ray,
-    objects: ArrayList(Object),
-    lights: ArrayList(Light),
-    options: RayCastingOptions,
+    objects: *ArrayList(Object),
+    lights: *ArrayList(Light),
+    options: *const RayCastingOptions,
     depth: usize,
-    x: usize,
-    y: usize,
 ) Vec3f {
     // ========================= DO NOT TOUCH ==========================
     // I have no idea on what the fuck it does and how the fuck it works.
@@ -109,7 +108,7 @@ pub fn cast_ray(
 
     var hit_object: Object = undefined;
     var hit: bool = false;
-    if (ray.trace(&objects, &t_near, &index, &uv, &hit_object)) {
+    if (ray.trace(objects, &t_near, &index, &uv, &hit_object)) {
         hit = true;
         const hit_point: Vec3f = ray.at(t_near);
         var normal: Vec3f = undefined;
@@ -145,8 +144,6 @@ pub fn cast_ray(
                     lights,
                     options,
                     depth + 1,
-                    x,
-                    y,
                 );
 
                 const refraction_color = cast_ray(
@@ -158,8 +155,6 @@ pub fn cast_ray(
                     lights,
                     options,
                     depth + 1,
-                    x,
-                    y,
                 );
 
                 var kr: float = undefined;
@@ -182,8 +177,6 @@ pub fn cast_ray(
                     lights,
                     options,
                     depth + 1,
-                    x,
-                    y,
                 ).multiply(kr);
             },
             .DIFFUSE_AND_GLOSSY => {
@@ -204,7 +197,7 @@ pub fn cast_ray(
                         .origin = shadow_point_origin,
                         .direction = light_direction,
                     }).trace(
-                        &objects,
+                        objects,
                         &t_near_shadow,
                         &index,
                         &uv,

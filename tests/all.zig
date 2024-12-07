@@ -1,14 +1,4 @@
-const ziglog = @import("ziglog");
-
 test "all" {
-    // Initialize a tests logger
-    _ = try ziglog.Logger.get(.{
-        .name = "tests",
-        .sink = .file,
-        .file_path = ".tests.log",
-        .format_string = "{message}",
-    });
-
     // Basic projections
     _ = @import("basics_projection/perspective_divide.zig");
     _ = @import("basics_projection/ndc_perspective_divide.zig");
@@ -28,4 +18,7 @@ test "all" {
 
     // Ray casting
     _ = @import("ray-casting/whitted.zig");
+
+    // Scene rendering
+    _ = @import("scene/basic.zig");
 }

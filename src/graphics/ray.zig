@@ -146,7 +146,7 @@ pub const Ray = struct {
             };
 
             if (intersects and t_near_k < t_near.*) {
-                hit_object.* = objects.*.items[k];
+                hit_object.* = objects.items[k];
                 t_near.* = t_near_k;
                 index.* = index_k;
                 uv.* = uv_k;

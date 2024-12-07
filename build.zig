@@ -11,11 +11,16 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const ziglog = b.dependency("ziglog", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    exe.root_module.addImport("ziglog", ziglog.module("ziglog"));
+    if (target.result.os.tag == .linux) {
+        exe.linkSystemLibrary("SDL2");
+        exe.linkLibC();
+    } else {
+        const sdl_dep = b.dependency("SDL2", .{
+            .optimize = .ReleaseFast,
+            .target = target,
+        });
+        exe.linkLibrary(sdl_dep.artifact("SDL2"));
+    }
 
     b.installArtifact(exe);
 
@@ -34,7 +39,6 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe_unit_tests.root_module.addImport("ziglog", ziglog.module("ziglog"));
     exe_unit_tests.root_module.addImport("z3d", b.createModule(.{
         .root_source_file = b.path("src/root.zig"),
     }));

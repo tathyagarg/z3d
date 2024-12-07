@@ -33,8 +33,8 @@ pub const MeshTriangle = struct {
 
             if (ray.triangle_intersect(v0, v1, v2, &t, &u, &v) and t < tn.*) {
                 tn.* = t;
-                uv.*.x = u;
-                uv.*.y = v;
+                uv.x = u;
+                uv.y = v;
                 index.* = k;
 
                 intersect = true;
