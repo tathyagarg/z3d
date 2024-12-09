@@ -34,6 +34,7 @@ pub fn projection_matrix_factory(
 pub const objects = @import("objects/object.zig");
 pub const material = @import("material.zig");
 pub const Ray = @import("ray.zig").Ray;
+pub const RGB = @import("rgb.zig").RGB;
 
 pub const Light = struct {
     position: Vec3f,

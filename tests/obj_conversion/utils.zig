@@ -6,9 +6,9 @@ const ArrayList = std.ArrayList;
 pub const Vec3 = z3d.math.Vec3;
 pub const Vec2 = z3d.math.Vec2;
 
-pub const LINE_STRING = "<line x1=\"{d}\" y1=\"{d}\" x2=\"{d}\" y2=\"{d}\" style=\"stroke:rgb({d}, 0, 0); stroke-width: 1\" />\n";
+pub const LINE_STRING: []const u8 = "<line x1=\"{d}\" y1=\"{d}\" x2=\"{d}\" y2=\"{d}\" style=\"stroke:rgb({d}, 0, 0); stroke-width: 1\" />\n";
 
-pub const ASSETS_DIR = "tests/assets";
+pub const ASSETS_DIR: []const u8 = "tests/assets";
 pub const MAX_LINE_LEN: usize = 64;
 pub const VERTEX_TYPE: type = f32;
 pub const TEXTURE_TYPE: type = f32;

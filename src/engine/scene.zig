@@ -14,6 +14,8 @@ const Ray = graphics.Ray;
 const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
 
+const RGB = @import("../systems/graphics/graphics.zig").RGB;
+
 pub const Scene = struct {
     label: []const u8,
     objects: *ArrayList(Object),
@@ -38,7 +40,7 @@ pub const Scene = struct {
         };
     }
 
-    pub fn render(self: Self, frame_buffer: *[]Vec3f) void {
+    pub fn render(self: Self, frame_buffer: *[]RGB) void {
         const scale: float = @tan(math.DEG_TO_RAD * self.ray_casting_options.fov * 0.5);
         const screen_aspect_ratio: float =
             @as(float, @floatFromInt(self.ray_casting_options.width)) /
@@ -61,13 +63,13 @@ pub const Scene = struct {
                 const direction = Vec3f.init(x, y, -1).normalize();
                 const ray = Ray{ .origin = origin, .direction = direction };
                 frame_buffer.*[j * self.ray_casting_options.width + i] =
-                    graphics.cast_ray(
+                    RGB.vec_to_rgb(graphics.cast_ray(
                     ray,
                     self.objects,
                     self.lights,
                     self.ray_casting_options,
                     0,
-                );
+                ));
             }
         }
     }

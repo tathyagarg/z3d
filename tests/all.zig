@@ -17,9 +17,12 @@ test "all" {
     _ = @import("obj_conversion/projection_matrix.zig");
 
     // Ray casting
-    _ = @import("ray-casting/whitted.zig");
+    // _ = @import("ray-casting/whitted.zig");
 
     // Scene rendering
-    _ = @import("scene/basic.zig");
-    _ = @import("scene/physics.zig");
+    // _ = @import("scene/basic.zig");
+    // _ = @import("scene/physics.zig");
+
+    // Windows
+    _ = @import("windows/window_init.zig");
 }

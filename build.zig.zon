@@ -3,9 +3,9 @@
     .version = "0.2.0-alpha",
     .minimum_zig_version = "0.11.0",
     .dependencies = .{
-        .ziglog = .{
-            .url = "https://github.com/tathyagarg/ziglog/archive/refs/tags/v0.2.0.tar.gz",
-            .hash = "1220700887c5cd9a1d1f754221fad2a5570d6e526225fdfbc6f376440cc02fd1f5b0",
+        .SDL2 = .{
+            .url = "https://github.com/allyourcodebase/SDL/archive/fe896e655b24890f5e13ba8b740ebe0e20c4a23b.zip",
+            .hash = "1220503f94b77f9c057139384cc37f020c291208f7bdee60285c71b315961cf717bd",
         },
     },
     .paths = .{"."},
