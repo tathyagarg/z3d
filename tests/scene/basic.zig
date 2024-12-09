@@ -12,13 +12,16 @@ const Light = graphics.Light;
 const allocator = std.testing.allocator;
 
 test "basic scene rendering" {
+    var sphere_mat = graphics.material.Material{
+        .diffuse_color = Vec3.init(0.1, 0.2, 0.9),
+    };
+
+    var sphere_pos = Vec3.init(-1, -1, -10);
     const sphere = objects.Object{
         .sphere = objects.Sphere.init(
-            Vec3.init(-1, -1, -10),
+            &sphere_pos,
             3,
-            graphics.material.Material{
-                .diffuse_color = Vec3.init(0.1, 0.2, 0.9),
-            },
+            &sphere_mat,
         ),
     };
 

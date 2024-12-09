@@ -1,15 +1,14 @@
 const std = @import("std");
-const all = @import("all.zig");
+const math = @import("math.zig");
 const constants = @import("../constants.zig");
 
-const Mat4 = all.Mat4;
-const Vec2 = all.Vec2;
-const appropriate_division = all.appropriate_division;
-const PixelComputationOptions = all.PixelComputationOptions;
+const Mat4 = math.Mat4;
+const Vec2 = math.Vec2;
+const appropriate_division = math.appropriate_division;
+const PixelComputationOptions = math.PixelComputationOptions;
 
-const math = @import("std").math;
-const sqrt = math.sqrt;
-const pow = math.pow;
+const sqrt = std.math.sqrt;
+const pow = std.math.pow;
 
 pub fn Vec3(comptime T: type) type {
     return packed struct {
@@ -29,6 +28,11 @@ pub fn Vec3(comptime T: type) type {
 
         pub fn init(x: T, y: T, z: T) Self {
             return Self{ .x = x, .y = y, .z = z };
+        }
+
+        pub fn infinity() Self {
+            const inf = std.math.inf(T);
+            return Self{ .x = inf, .y = inf, .z = inf };
         }
 
         pub fn negate(self: Self) Self {

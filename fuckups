@@ -5,3 +5,4 @@ I'm a dumbass. Turns out, that happened because points out of screen bounds gave
 Implemented a function which takes params in a set order. Then I proceeded to ignore that order and switch params.
 Accidentally included a bajillion line long file in git commit.
 Clamped a f32 to [0, 1] but forgot to multiply by 255 to convert to a usable color.
+Added a function to initialize a Vec3 and return a pointer to it. I'm a retard.

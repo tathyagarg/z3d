@@ -21,4 +21,5 @@ test "all" {
 
     // Scene rendering
     _ = @import("scene/basic.zig");
+    _ = @import("scene/physics.zig");
 }

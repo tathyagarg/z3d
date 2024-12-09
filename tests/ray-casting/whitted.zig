@@ -80,33 +80,44 @@ test "whitted ray casting" {
     var lights = ArrayList(Light).init(allocator);
     defer lights.deinit();
 
-    const sph1 = Object{ .sphere = objectslib.Sphere.init(
-        Vec3.init(-1, 0, -12),
-        2,
-        material.Material{
-            .material_type = material.MaterialType.DIFFUSE_AND_GLOSSY,
-            .diffuse_color = Vec3.init(0.6, 0.7, 0.8),
-        },
-    ) };
+    var sph1_mat = material.Material{
+        .material_type = material.MaterialType.DIFFUSE_AND_GLOSSY,
+        .diffuse_color = Vec3.init(0.6, 0.7, 0.8),
+    };
 
-    const sph2 = Object{ .sphere = objectslib.Sphere.init(
-        Vec3.init(0.5, -1.5, -8),
-        1.5,
-        material.Material{
-            .ior = 1.5,
-            .material_type = material.MaterialType.REFLECTION_AND_REFRACTION,
-        },
-    ) };
+    var sph1_pos = Vec3.init(-1, 0, -12);
+    const sph1 = Object{
+        .sphere = objectslib.Sphere.init(
+            &sph1_pos,
+            2,
+            &sph1_mat,
+        ),
+    };
+
+    var sph2_mat = material.Material{
+        .ior = 1.5,
+        .material_type = material.MaterialType.REFLECTION_AND_REFRACTION,
+    };
+
+    var sph2_pos = Vec3.init(0.5, -1.5, -8);
+    const sph2 = Object{
+        .sphere = objectslib.Sphere.init(
+            &sph2_pos,
+            1.5,
+            &sph2_mat,
+        ),
+    };
 
     try objects.append(sph1);
     try objects.append(sph2);
 
-    const vertices = [4]Vec3{
+    var vertices_data = [_]Vec3{
         Vec3.init(-5, -3, -6),
         Vec3.init(5, -3, -6),
         Vec3.init(5, -3, -16),
         Vec3.init(-5, -3, -16),
     };
+    var vertices: [*]Vec3 = &vertices_data;
 
     const vertex_indices = [6]usize{ 0, 1, 3, 1, 2, 3 };
     const textures = [4]Vec2{
@@ -116,15 +127,21 @@ test "whitted ray casting" {
         Vec2.init(0, 1),
     };
 
-    const mesh = Object{ .mesh_triangle = objectslib.MeshTriangle{
-        .vertices = &vertices,
-        .vertex_indices = &vertex_indices,
-        .num_triangles = 2,
-        .textures = &textures,
-        .material = material.Material{
-            .material_type = material.MaterialType.DIFFUSE_AND_GLOSSY,
-        },
-    } };
+    var mesh_mat = material.Material{
+        .material_type = material.MaterialType.DIFFUSE_AND_GLOSSY,
+    };
+
+    const mesh = Object{
+        .mesh_triangle = objectslib.MeshTriangle.init(
+            &vertices,
+            4,
+            &vertex_indices,
+            2,
+            &textures,
+            &mesh_mat,
+            null,
+        ),
+    };
 
     try objects.append(mesh);
 

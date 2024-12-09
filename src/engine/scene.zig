@@ -1,5 +1,5 @@
-const graphics = @import("../graphics/all.zig");
-const math = @import("../core/math/all.zig");
+const graphics = @import("../systems/graphics/graphics.zig");
+const math = @import("../core/math/math.zig");
 const constants = @import("../core/constants.zig");
 
 const float = constants.FLOAT;
