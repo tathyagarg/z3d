@@ -21,14 +21,15 @@ pub const Sphere = struct {
     radius_sqr: float = undefined,
 
     material: *Material,
-    physics: ?*const physics.PhysicsEngine = null,
+    physics: ?*physics.PhysicsEngine = null,
 
     const Self = @This();
 
     pub fn init(c: *Vec3f, r: float, material: *Material) Self {
-        var position_handler = position.PositionHandler{
+        const position_handler = position.PositionHandler{
             .single = position.SinglePointHandler{
                 .point = c,
+                .is_static = false,
             },
         };
         return Self{
@@ -36,7 +37,6 @@ pub const Sphere = struct {
             .radius = r,
             .radius_sqr = r * r,
             .material = material,
-            .physics = &physics.PhysicsEngine.init(&position_handler, .{}),
         };
     }
 

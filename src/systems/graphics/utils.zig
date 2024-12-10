@@ -83,6 +83,9 @@ pub const RayCastingOptions = struct {
     max_depth: usize = 5,
     background_color: Vec3f = math.rgb_to_vec3f(float, 250, 249, 246),
     bias: float = 0.00001,
+
+    near_plane: float = 0.5,
+    far_plane: float = 100.0,
 };
 
 pub fn cast_ray(
@@ -109,6 +112,8 @@ pub fn cast_ray(
     var hit_object: Object = undefined;
     var hit: bool = false;
     if (ray.trace(objects, &t_near, &index, &uv, &hit_object)) {
+        if (t_near > options.far_plane or t_near < options.near_plane) return options.background_color;
+
         hit = true;
         const hit_point: Vec3f = ray.at(t_near);
         var normal: Vec3f = undefined;

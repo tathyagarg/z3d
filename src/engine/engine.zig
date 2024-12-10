@@ -93,7 +93,7 @@ pub const Engine = struct {
         scene.render(&initial_frame_buf);
         // for (0..height) |j| {
         //     for (0..width) |i| {
-        //         initial_frame_buf[j * width + i] = RGB.vec_to_rgb(Vec3f.diagonal(0));
+        //         std.debug.print("{any}\n", .{initial_frame_buf[j * width + i]});
         //     }
         // }
 
@@ -114,9 +114,10 @@ pub const Engine = struct {
         sdl.SDL_Quit();
     }
 
-    pub fn mainloop(self: Engine) !void {
+    pub fn mainloop(self: *Engine) !void {
         var event: sdl.SDL_Event = undefined;
         var running = true;
+
         while (running) {
             while (sdl.SDL_PollEvent(&event) != 0) {
                 if (event.type == sdl.SDL_QUIT) {
@@ -124,9 +125,11 @@ pub const Engine = struct {
                 }
             }
 
+            // const current = sdl.SDL_GetTicks();
+
             for (0..self.height) |j| {
                 for (0..self.width) |i| {
-                    const rgb = self.frame_buffer[j * self.width + i];
+                    const rgb = self.frame_buffer[j * self.height + i];
                     const r = rgb.r;
                     const g = rgb.g;
                     const b = rgb.b;
@@ -137,7 +140,7 @@ pub const Engine = struct {
                         b,
                         100,
                     ) != 0) {
-                        std.debug.print("{any}\n", .{sdl.SDL_GetError()});
+                        std.debug.print("\nSetErr: {any} ({d} {d} {d} {any})\n", .{ sdl.SDL_GetError(), r, g, b, rgb });
                         return error.SetRenderDrawColorFailed;
                     }
 
@@ -146,11 +149,17 @@ pub const Engine = struct {
                         @as(c_int, @intCast(i)),
                         @as(c_int, @intCast(j)),
                     ) != 0) {
-                        std.debug.print("{any}\n", .{sdl.SDL_GetError()});
+                        std.debug.print("\nDrawErr: {any}\n", .{sdl.SDL_GetError()});
                         return error.DrawPointFailed;
                     }
                 }
             }
+
+            for (self.scene.objects.items) |o| {
+                var phy = o.get_physics_engine() orelse continue;
+                try phy.update();
+            }
+            self.scene.render(&self.frame_buffer);
 
             sdl.SDL_RenderPresent(self.renderer);
         }

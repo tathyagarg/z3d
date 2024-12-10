@@ -46,7 +46,7 @@ pub const Scene = struct {
             @as(float, @floatFromInt(self.ray_casting_options.width)) /
             @as(float, @floatFromInt(self.ray_casting_options.height));
 
-        const origin = Vec3f.diagonal(-1);
+        const origin = Vec3f.diagonal(0);
 
         for (0..self.ray_casting_options.height) |j| {
             for (0..self.ray_casting_options.width) |i| {
@@ -62,14 +62,16 @@ pub const Scene = struct {
 
                 const direction = Vec3f.init(x, y, -1).normalize();
                 const ray = Ray{ .origin = origin, .direction = direction };
-                frame_buffer.*[j * self.ray_casting_options.width + i] =
-                    RGB.vec_to_rgb(graphics.cast_ray(
+
+                const curr_pixel = RGB.vec_to_rgb(graphics.cast_ray(
                     ray,
                     self.objects,
                     self.lights,
                     self.ray_casting_options,
                     0,
                 ));
+
+                frame_buffer.*[j * self.ray_casting_options.width + i] = curr_pixel;
             }
         }
     }

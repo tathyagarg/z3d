@@ -4,6 +4,7 @@ const std = @import("std");
 const engine = z3d.engine;
 const graphics = z3d.graphics;
 const math = z3d.math;
+const physics = z3d.physics;
 const Scene = z3d.engine.Scene;
 const objects = graphics.objects;
 const Light = graphics.Light;
@@ -16,14 +17,19 @@ test "window initialization" {
         .diffuse_color = Vec3.init(0.1, 0.2, 0.9),
     };
 
-    var sphere_pos = Vec3.init(-1, -1, -10);
-    const sphere = objects.Object{
+    var sphere_pos = Vec3.init(0, 0, -10);
+    var sphere = objects.Object{
         .sphere = objects.Sphere.init(
             &sphere_pos,
             3,
             &sphere_mat,
         ),
     };
+    var phy = physics.PhysicsEngine.init(
+        &sphere.sphere.position,
+        .{ .force = Vec3.init(0, 1, 0) },
+    );
+    sphere.add_physics(&phy);
 
     var scene_objects = std.ArrayList(objects.Object).init(allocator);
     defer scene_objects.deinit();
@@ -41,7 +47,7 @@ test "window initialization" {
     try lights.append(light);
 
     const scene = Scene.init(&scene_objects, &lights, .{});
-    const eng = try engine.Engine.init(
+    var eng = try engine.Engine.init(
         "Z3D",
         1,
         1,

@@ -50,7 +50,7 @@ pub const Object = union(enum) {
         };
     }
 
-    pub fn get_physics_engine(self: Self) *physics.PhysicsEngine {
+    pub fn get_physics_engine(self: Self) ?*physics.PhysicsEngine {
         return switch (self) {
             .sphere => |s| s.physics,
             .mesh_triangle => |t| t.physics,

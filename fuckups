@@ -6,3 +6,4 @@ Implemented a function which takes params in a set order. Then I proceeded to ig
 Accidentally included a bajillion line long file in git commit.
 Clamped a f32 to [0, 1] but forgot to multiply by 255 to convert to a usable color.
 Added a function to initialize a Vec3 and return a pointer to it. I'm a retard.
+Was wondering why no pixels were showing up on the SDL window until I realized I wasn't calling the method which actually drew the pixels.

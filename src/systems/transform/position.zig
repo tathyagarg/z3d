@@ -1,3 +1,4 @@
+const std = @import("std");
 const math = @import("../../core/math/math.zig");
 const float = @import("../../core/constants.zig").FLOAT;
 
@@ -45,18 +46,12 @@ pub const PositionHandler = union(enum) {
 
     const Self = @This();
 
-    pub fn translate(self: Self, dxyz: Vec3f) !void {
-        switch (self) {
+    pub fn translate(self: *const Self, dxyz: Vec3f) void {
+        switch (self.*) {
             .single => |s| {
-                if (s.is_static) {
-                    return error.CannotTranslateStaticBody;
-                }
                 s.point.* = s.point.add(dxyz);
             },
             .multi => |m| {
-                if (m.is_static) {
-                    return error.CannotTranslateStaticBody;
-                }
                 for (0..m.point_count) |i| {
                     m.points[i] = m.points[i].add(dxyz);
                 }
