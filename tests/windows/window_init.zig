@@ -17,17 +17,17 @@ test "window initialization" {
         .diffuse_color = Vec3.init(0.1, 0.2, 0.9),
     };
 
-    var sphere_pos = Vec3.init(0, 0, -10);
+    var sphere_pos = Vec3.init(0, 0, -50);
     var sphere = objects.Object{
         .sphere = objects.Sphere.init(
             &sphere_pos,
-            3,
+            0.5,
             &sphere_mat,
         ),
     };
     var phy = physics.PhysicsEngine.init(
         &sphere.sphere.position,
-        .{ .force = Vec3.init(0, 1, 0) },
+        .{ .acceleration = Vec3.init(0, -1, 0), .mass = 1 },
     );
     sphere.add_physics(&phy);
 

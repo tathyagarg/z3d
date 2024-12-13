@@ -14,7 +14,8 @@ pub const PhysicsEngine = struct {
     acceleration: Vec3f,
     inv_mass: float,
 
-    damping: float = 0.1,
+    // Why 0.75? Feels kinda smooth
+    damping: float = 0.75,
 
     const Self = @This();
 
@@ -39,13 +40,25 @@ pub const PhysicsEngine = struct {
     }
 
     pub fn update(self: *Self) !void {
-        // self.position.translate(Vec3f.init(0, 0, -1));
         self.position.translate(self.velocity);
 
         const resulting_acc = self.acceleration.add(self.force.multiply(self.inv_mass));
 
         self.velocity = self.velocity.add(resulting_acc);
         self.velocity = self.velocity.multiply(self.damping);
-        // self.force.* = Vec3f.zero();
+
+        self.clear_force();
+    }
+
+    pub fn apply_gravity(self: *Self, gravity: Vec3f) void {
+        self.add_force(gravity.multiply(1 / self.inv_mass));
+    }
+
+    pub fn add_force(self: *Self, force: Vec3f) void {
+        self.force = self.force.add(force);
+    }
+
+    pub fn clear_force(self: *Self) void {
+        self.force = Vec3f.zero();
     }
 };
