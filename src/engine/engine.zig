@@ -3,6 +3,9 @@
 pub const scenelib = @import("scene.zig");
 pub const Scene = scenelib.Scene;
 
+pub const cameralib = @import("camera.zig");
+pub const Camera = cameralib.Camera;
+
 // ======================================
 
 const sdl = @cImport(@cInclude("SDL2/SDL.h"));

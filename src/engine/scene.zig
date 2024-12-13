@@ -1,3 +1,4 @@
+const std = @import("std");
 const graphics = @import("../systems/graphics/graphics.zig");
 const math = @import("../core/math/math.zig");
 const constants = @import("../core/constants.zig");
@@ -10,6 +11,7 @@ const Object = graphics.objects.Object;
 const Light = graphics.Light;
 const RayCastingOptions = graphics.RayCastingOptions;
 const Ray = graphics.Ray;
+const Camera = @import("camera.zig").Camera;
 
 const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
@@ -21,10 +23,12 @@ pub const Scene = struct {
     objects: *ArrayList(Object),
     lights: *ArrayList(Light),
     ray_casting_options: *const RayCastingOptions,
+    camera: Camera,
 
     const Self = @This();
 
     pub fn init(
+        camera: Camera,
         objects: *ArrayList(Object),
         lights: *ArrayList(Light),
         options: struct {
@@ -33,6 +37,7 @@ pub const Scene = struct {
         },
     ) Self {
         return Self{
+            .camera = camera,
             .objects = objects,
             .lights = lights,
             .label = options.label,
@@ -46,8 +51,6 @@ pub const Scene = struct {
             @as(float, @floatFromInt(self.ray_casting_options.width)) /
             @as(float, @floatFromInt(self.ray_casting_options.height));
 
-        const origin = Vec3f.diagonal(0);
-
         for (0..self.ray_casting_options.height) |j| {
             for (0..self.ray_casting_options.width) |i| {
                 const x: float =
@@ -60,8 +63,11 @@ pub const Scene = struct {
                     @as(float, @floatFromInt(self.ray_casting_options.height))) *
                     scale;
 
-                const direction = Vec3f.init(x, y, -1).normalize();
-                const ray = Ray{ .origin = origin, .direction = direction };
+                const direction = self.camera.get_direction(x, y).normalize();
+                const ray = Ray{
+                    .origin = self.camera.position,
+                    .direction = direction,
+                };
 
                 const curr_pixel = RGB.vec_to_rgb(graphics.cast_ray(
                     ray,

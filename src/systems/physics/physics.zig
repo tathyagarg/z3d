@@ -7,6 +7,8 @@ const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
 const position = transform.position;
 
+pub const GRAVITY = Vec3f.init(0, -0.5, 0);
+
 pub const PhysicsEngine = struct {
     position: *const position.PositionHandler,
     velocity: Vec3f,
@@ -15,7 +17,8 @@ pub const PhysicsEngine = struct {
     inv_mass: float,
 
     // Why 0.75? Feels kinda smooth
-    damping: float = 0.75,
+    // Scratch that, smoothness went away went object was brought closer from z = -50
+    damping: float = 0.5,
 
     const Self = @This();
 
@@ -42,7 +45,9 @@ pub const PhysicsEngine = struct {
     pub fn update(self: *Self) !void {
         self.position.translate(self.velocity);
 
-        const resulting_acc = self.acceleration.add(self.force.multiply(self.inv_mass));
+        const resulting_acc = self.acceleration.add(
+            self.force.multiply(self.inv_mass),
+        );
 
         self.velocity = self.velocity.add(resulting_acc);
         self.velocity = self.velocity.multiply(self.damping);
