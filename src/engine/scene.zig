@@ -65,7 +65,7 @@ pub const Scene = struct {
 
                 const direction = self.camera.get_direction(x, y).normalize();
                 const ray = Ray{
-                    .origin = self.camera.position,
+                    .origin = self.camera.position.*,
                     .direction = direction,
                 };
 

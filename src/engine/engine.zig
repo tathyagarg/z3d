@@ -121,7 +121,33 @@ pub const Engine = struct {
         var event: sdl.SDL_Event = undefined;
         var running = true;
 
-        while (running) {
+        const rots = [_]Vec3f{
+            Vec3f.init(1, 0, 0),
+            Vec3f.init(0.8, 0, 0.2),
+            Vec3f.init(0.6, 0, 0.4),
+            Vec3f.init(0.4, 0, 0.6),
+            Vec3f.init(0.2, 0, 0.8),
+            Vec3f.init(0, 0, 1),
+            Vec3f.init(-0.2, 0, 0.8),
+            Vec3f.init(-0.4, 0, 0.6),
+            Vec3f.init(-0.6, 0, 0.4),
+            Vec3f.init(-0.8, 0, 0.2),
+            Vec3f.init(-1, 0, 0),
+            Vec3f.init(-0.8, 0, -0.2),
+            Vec3f.init(-0.6, 0, -0.4),
+            Vec3f.init(-0.4, 0, -0.6),
+            Vec3f.init(-0.2, 0, -0.8),
+            Vec3f.init(0, 0, -1),
+            Vec3f.init(0.2, 0, -0.8),
+            Vec3f.init(0.4, 0, -0.6),
+            Vec3f.init(0.6, 0, -0.4),
+            Vec3f.init(0.8, 0, -0.2),
+        };
+
+        var n: usize = 0;
+
+        while (running) : (n = (n + 1) % rots.len) {
+            // self.scene.camera.direction.* = rots[n];
             while (sdl.SDL_PollEvent(&event) != 0) {
                 if (event.type == sdl.SDL_QUIT) {
                     running = false;

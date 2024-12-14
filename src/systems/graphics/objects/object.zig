@@ -36,7 +36,7 @@ pub const Object = union(enum) {
         }
     }
 
-    pub fn get_material(self: Self) *mat.Material {
+    pub fn get_material(self: Self) *const mat.Material {
         return switch (self) {
             .sphere => |s| s.material,
             .mesh_triangle => |t| t.material,
