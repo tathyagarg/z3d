@@ -9,6 +9,7 @@ const Scene = z3d.engine.Scene;
 const objects = graphics.objects;
 const Light = graphics.Light;
 const Camera = engine.Camera;
+const transform = z3d.transform;
 
 const Vec3 = math.Vec3(f32);
 const allocator = std.testing.allocator;
@@ -52,10 +53,19 @@ test "window initialization" {
 
     try lights.append(light);
 
-    const cam = Camera{
-        .position = @constCast(&Vec3.init(0, 0, 0)),
-        .direction = @constCast(&Vec3.init(0.5, 0, 0.5)),
-    };
+    // const cam = Camera{
+    //     .position = &transform.PositionHandler{
+    //         .single = transform.SinglePointHandler{
+    //             .point = @constCast(&Vec3.init(0, 0, 0)),
+    //         },
+    //     },
+    //     .direction = @constCast(&Vec3.init(0, 90, 0)),
+    // };
+    const pos_handler = transform.PositionHandler{ .single = transform.SinglePointHandler{
+        .point = @constCast(&Vec3.zero()),
+        .direction = @constCast(&Vec3.zero()),
+    } };
+    const cam = Camera{ .position = &pos_handler };
 
     const scene = Scene.init(cam, &scene_objects, &lights, .{});
     var eng = try engine.Engine.init(

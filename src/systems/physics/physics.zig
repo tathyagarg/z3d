@@ -1,11 +1,10 @@
 const std = @import("std");
 const math = @import("../../core/math/math.zig");
-const transform = @import("../transform/transform.zig");
+const position = @import("../transform.zig");
 const float = @import("../../core/constants.zig").FLOAT;
 
 const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
-const position = transform.position;
 
 pub const GRAVITY = Vec3f.init(0, -0.5, 0);
 

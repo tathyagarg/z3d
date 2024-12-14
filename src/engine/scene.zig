@@ -1,4 +1,6 @@
+const sdl = @cImport(@cInclude("SDL2/SDL.h"));
 const std = @import("std");
+
 const graphics = @import("../systems/graphics/graphics.zig");
 const math = @import("../core/math/math.zig");
 const constants = @import("../core/constants.zig");
@@ -45,6 +47,12 @@ pub const Scene = struct {
         };
     }
 
+    pub fn handle_event(self: Self, event: sdl.SDL_Event) void {
+        for (self.objects.items) |obj| {
+            obj.handle_event(event);
+        }
+    }
+
     pub fn render(self: Self, frame_buffer: *[]RGB) void {
         const scale: float = @tan(math.DEG_TO_RAD * self.ray_casting_options.fov * 0.5);
         const screen_aspect_ratio: float =
@@ -65,7 +73,7 @@ pub const Scene = struct {
 
                 const direction = self.camera.get_direction(x, y).normalize();
                 const ray = Ray{
-                    .origin = self.camera.position.*,
+                    .origin = self.camera.position.single.point.*,
                     .direction = direction,
                 };
 

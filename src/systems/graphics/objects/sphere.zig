@@ -1,7 +1,7 @@
 const math = @import("../../../core/math/math.zig");
 const float = @import("../../../core/constants.zig").FLOAT;
 const physics = @import("../../physics/physics.zig");
-const position = @import("../../transform/transform.zig").position;
+const position = @import("../../transform.zig");
 
 const Vec3 = math.Vec3;
 const Vec2 = math.Vec2;

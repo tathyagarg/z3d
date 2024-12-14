@@ -121,38 +121,22 @@ pub const Engine = struct {
         var event: sdl.SDL_Event = undefined;
         var running = true;
 
-        const rots = [_]Vec3f{
-            Vec3f.init(1, 0, 0),
-            Vec3f.init(0.8, 0, 0.2),
-            Vec3f.init(0.6, 0, 0.4),
-            Vec3f.init(0.4, 0, 0.6),
-            Vec3f.init(0.2, 0, 0.8),
-            Vec3f.init(0, 0, 1),
-            Vec3f.init(-0.2, 0, 0.8),
-            Vec3f.init(-0.4, 0, 0.6),
-            Vec3f.init(-0.6, 0, 0.4),
-            Vec3f.init(-0.8, 0, 0.2),
-            Vec3f.init(-1, 0, 0),
-            Vec3f.init(-0.8, 0, -0.2),
-            Vec3f.init(-0.6, 0, -0.4),
-            Vec3f.init(-0.4, 0, -0.6),
-            Vec3f.init(-0.2, 0, -0.8),
-            Vec3f.init(0, 0, -1),
-            Vec3f.init(0.2, 0, -0.8),
-            Vec3f.init(0.4, 0, -0.6),
-            Vec3f.init(0.6, 0, -0.4),
-            Vec3f.init(0.8, 0, -0.2),
-        };
-
-        var n: usize = 0;
-
-        while (running) : (n = (n + 1) % rots.len) {
-            // self.scene.camera.direction.* = rots[n];
+        while (running) {
+            // self.scene.camera.direction.y += 5;
+            // self.scene.camera.direction.x = @sin(2 * self.scene.camera.direction.y * math.DEG_TO_RAD) * 10;
             while (sdl.SDL_PollEvent(&event) != 0) {
                 if (event.type == sdl.SDL_QUIT) {
                     running = false;
+                } else {
+                    self.scene.camera.handle_event(event);
                 }
             }
+
+            for (self.scene.objects.items) |o| {
+                var phy = o.get_physics_engine() orelse continue;
+                try phy.update();
+            }
+            self.scene.render(&self.frame_buffer);
 
             // const current = sdl.SDL_GetTicks();
 
@@ -183,12 +167,6 @@ pub const Engine = struct {
                     }
                 }
             }
-
-            for (self.scene.objects.items) |o| {
-                var phy = o.get_physics_engine() orelse continue;
-                try phy.update();
-            }
-            self.scene.render(&self.frame_buffer);
 
             sdl.SDL_RenderPresent(self.renderer);
         }

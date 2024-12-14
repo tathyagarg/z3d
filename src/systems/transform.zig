@@ -1,6 +1,6 @@
 const std = @import("std");
-const math = @import("../../core/math/math.zig");
-const float = @import("../../core/constants.zig").FLOAT;
+const math = @import("../core/math/math.zig");
+const float = @import("../core/constants.zig").FLOAT;
 
 const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
@@ -12,6 +12,7 @@ pub const Bounds = struct {
 
 pub const SinglePointHandler = struct {
     point: *Vec3f,
+    direction: *Vec3f = @constCast(&Vec3f.zero()),
     is_static: bool = false,
 };
 
@@ -57,5 +58,22 @@ pub const PositionHandler = union(enum) {
                 }
             },
         }
+    }
+
+    pub fn rotate(self: *const Self, amount: Vec3f) void {
+        _ = .{amount};
+        switch (self.*) {
+            .single => {}, // No-op,
+            .multi => {
+                unreachable;
+            }, // TODO: IMPLEMENT THIS
+        }
+    }
+
+    pub fn get_direction(self: *const Self) *Vec3f {
+        return switch (self.*) {
+            .single => |s| s.direction,
+            .multi => unreachable, // TODO: IMPLEMENT THIS
+        };
     }
 };
