@@ -17,7 +17,7 @@ pub const PhysicsEngine = struct {
 
     // Why 0.75? Feels kinda smooth
     // Scratch that, smoothness went away went object was brought closer from z = -50
-    damping: float = 0.5,
+    damping: float = 0.99,
 
     const Self = @This();
 

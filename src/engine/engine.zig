@@ -12,6 +12,8 @@ const sdl = @cImport(@cInclude("SDL2/SDL.h"));
 const std = @import("std");
 const allocator = std.heap.page_allocator;
 
+const gl = @cImport(@cInclude("glad.h"));
+
 const math = @import("../core/math/math.zig");
 const float = @import("../core/constants.zig").FLOAT;
 
@@ -50,6 +52,7 @@ pub const Engine = struct {
     height: u16,
     frame_buffer: []RGB = undefined,
     scene: Scene,
+    abc: ?gl = 1,
 
     pub fn init(
         title: [*:0]const u8,

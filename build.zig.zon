@@ -7,6 +7,10 @@
             .url = "https://github.com/allyourcodebase/SDL/archive/fe896e655b24890f5e13ba8b740ebe0e20c4a23b.zip",
             .hash = "1220503f94b77f9c057139384cc37f020c291208f7bdee60285c71b315961cf717bd",
         },
+        .zigglgen = .{
+            .url = "git+https://github.com/castholm/zigglgen#701f41808086411f14d3bc2d87fc0b14bd09ceba",
+            .hash = "1220acff2285b51630055c7c062fb62a01b32272297b27e90cd6f85901c1b4d1c48d",
+        },
     },
     .paths = .{"."},
 }

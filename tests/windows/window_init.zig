@@ -40,6 +40,7 @@ test "window initialization" {
         const sphere = objects.Object{
             .sphere = objects.Sphere.init(p, 1, c),
         };
+
         try scene_objects.append(sphere);
     }
 
@@ -67,13 +68,13 @@ test "window initialization" {
     } };
     const cam = Camera{ .position = &pos_handler };
 
-    const scene = Scene.init(cam, &scene_objects, &lights, .{});
+    const scene = Scene.init(cam, &scene_objects, &lights, .{ .ray_casting_options = &graphics.RayCastingOptions{ .width = 600, .height = 600 } });
     var eng = try engine.Engine.init(
         "Z3D",
         1,
         1,
-        400,
-        400,
+        600,
+        600,
         engine.WindowFlags.default(),
         scene,
     );
