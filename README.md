@@ -1,6 +1,12 @@
 # Z3D
 
-<img src="assets/logo-1600x1600.png" alt="Logo of Z3D"></img>
+<p align="center">
+<img src="assets/logo-1600x1600.png" alt="Logo of Z3D" height="400px" width="400px"/>
+</p>
+<p align="center">
+<img src="https://img.shields.io/badge/zig-F7A41D?style=for-the-badge&logo=zig&logoColor=white"/>
+<img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white"/>
+</p>
 
 A primitive 3D game engine written in Zig
 
