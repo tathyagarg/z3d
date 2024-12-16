@@ -1,4 +1,7 @@
 # Z3D
+
+<img src="assets/logo-1600x1600.png" alt="Logo of Z3D"></img>
+
 A primitive 3D game engine written in Zig
 
 ## Resources and References

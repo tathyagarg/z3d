@@ -1,0 +1,22 @@
+<!DOCTYPE svg>
+<svg
+  width="400"
+  height="400"
+  viewBox="0 0 400 400"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Background -->
+  <rect width="400" height="400" fill="#24273A" />
+  <!-- Hexagon -->
+  <path
+    d="M200 50L329.904 125V275L200 350L70.0962 275V125L200 50Z"
+    fill="#D9D9D9"
+  />
+  <!-- Z -->
+  <path
+    d="M141.525 120.75H256.95V146.175L178.425 259.125V259.575H256.95V285H141.525V259.575L220.275 146.625V146.175H141.525V120.75Z"
+    fill="#24273A"
+  />
+</svg>
+
