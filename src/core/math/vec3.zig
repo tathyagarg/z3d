@@ -78,18 +78,18 @@ pub fn Vec3(comptime T: type) type {
         /// Returns the x-projection of a point in raster space
         /// x_proj_raster = ((1 + (p.x / -p.z)) / 2) * SCREEN_WIDTH
         /// x_proj_raster is in the range [0, SCREEN_WIDTH] and is in raster space
-        pub fn raster_x_projection(self: Self) error{ZisZero}!T {
-            const x_proj_ndc = try self.ndc_x_projection();
-            return x_proj_ndc * constants.SCREEN_WIDTH;
-        }
+        // pub fn raster_x_projection(self: Self) error{ZisZero}!T {
+        //     const x_proj_ndc = try self.ndc_x_projection();
+        //     return x_proj_ndc * constants.SCREEN_WIDTH;
+        // }
 
         /// Returns the y-projection of a point in raster space
         /// y_proj_raster = ((1 + (p.y / -p.z)) / 2) * SCREEN_HEIGHT
         /// y_proj_raster is in the range [0, SCREEN_HEIGHT] and is in raster space
-        pub fn raster_y_projection(self: Self) error{ZisZero}!T {
-            const y_proj_ndc = try self.ndc_y_projection();
-            return y_proj_ndc * constants.SCREEN_HEIGHT;
-        }
+        // pub fn raster_y_projection(self: Self) error{ZisZero}!T {
+        //     const y_proj_ndc = try self.ndc_y_projection();
+        //     return y_proj_ndc * constants.SCREEN_HEIGHT;
+        // }
 
         pub fn add(self: Self, other: Self) Self {
             return Self{

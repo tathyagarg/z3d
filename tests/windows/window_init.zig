@@ -10,9 +10,13 @@ const objects = graphics.objects;
 const Light = graphics.Light;
 const Camera = engine.Camera;
 const transform = z3d.transform;
+const EventHandler = z3d.event_handler.EventHandler;
 
 const Vec3 = math.Vec3(f32);
 const allocator = std.testing.allocator;
+
+const HEIGHT = 500;
+const WIDTH = 500;
 
 test "window initialization" {
     var scene_objects = std.ArrayList(objects.Object).init(allocator);
@@ -65,15 +69,34 @@ test "window initialization" {
         .point = @constCast(&Vec3.zero()),
         .direction = @constCast(&Vec3.zero()),
     } };
-    const cam = Camera{ .position = &pos_handler };
+    const cam = Camera{
+        .position = &pos_handler,
+        .event_handler = &EventHandler{
+            .keyboard_movement = true,
+            .mouse_movement = true,
+            .width = WIDTH,
+            .height = HEIGHT,
+        },
+    };
 
-    const scene = Scene.init(cam, &scene_objects, &lights, .{});
+    const scene = Scene.init(
+        cam,
+        &scene_objects,
+        &lights,
+        .{
+            .ray_casting_options = &graphics.RayCastingOptions{
+                .width = WIDTH,
+                .height = HEIGHT,
+                .fov = 90,
+            },
+        },
+    );
     var eng = try engine.Engine.init(
         "Z3D",
         1,
         1,
-        400,
-        400,
+        WIDTH,
+        HEIGHT,
         engine.WindowFlags.default(),
         scene,
     );

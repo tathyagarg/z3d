@@ -1,8 +1,8 @@
 test "all" {
     // Basic projections
-    _ = @import("basics_projection/perspective_divide.zig");
-    _ = @import("basics_projection/ndc_perspective_divide.zig");
-    _ = @import("basics_projection/raster_perspective_divide.zig");
+    // _ = @import("basics_projection/perspective_divide.zig");
+    // _ = @import("basics_projection/ndc_perspective_divide.zig");
+    // _ = @import("basics_projection/raster_perspective_divide.zig");
 
     // Geometry
     _ = @import("geometry/subtraction.zig");

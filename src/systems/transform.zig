@@ -63,7 +63,9 @@ pub const PositionHandler = union(enum) {
     pub fn rotate(self: *const Self, amount: Vec3f) void {
         _ = .{amount};
         switch (self.*) {
-            .single => {}, // No-op,
+            .single => |s| {
+                s.direction.* = amount;
+            },
             .multi => {
                 unreachable;
             }, // TODO: IMPLEMENT THIS

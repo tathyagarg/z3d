@@ -213,8 +213,12 @@ pub fn cast_ray(
                         .add(light.intensity
                         .multiply(LdotN)
                         .multiply(@as(float, @floatFromInt(1 - in_shadow))));
-                    const pre_reflection_direction = Ray{ .origin = Vec3f.zero(), .direction = light_direction.negate() };
-                    const reflection_direction = pre_reflection_direction.reflection(normal);
+
+                    // Use code that is identical to `Ray.reflection(normal)` to calculate the reflection direction
+                    // (But spare creating the unnecessary Ray object)
+                    const reflection_direction = light_direction.negate().subtract(
+                        normal.multiply(2 * light_direction.negate().dot(normal)),
+                    );
                     specular_color = specular_color.add(
                         light.intensity.multiply(
                             std.math.pow(

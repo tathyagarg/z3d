@@ -3,7 +3,8 @@ const sdl = @cImport(@cInclude("SDL2/SDL.h"));
 
 const math = @import("../core/math/math.zig");
 
-const float = @import("../core/constants.zig").FLOAT;
+const constants = @import("../core/constants.zig");
+const float = constants.FLOAT;
 const Vec3 = @import("../core/math/math.zig").Vec3;
 const Vec3f = Vec3(float);
 
@@ -14,6 +15,9 @@ pub const EventHandler = packed struct {
     noop: bool = false,
     keyboard_movement: bool = false,
     mouse_movement: bool = false,
+
+    width: usize = 400,
+    height: usize = 400,
 
     const Self = @This();
 
@@ -57,7 +61,11 @@ pub const EventHandler = packed struct {
             sdl.SDL_MOUSEMOTION => {
                 var x: i32, var y: i32 = .{ undefined, undefined };
                 _ = sdl.SDL_GetMouseState(&x, &y);
-                std.debug.print("MOVE {d} {d}!\n", .{ x, y });
+                position.rotate(Vec3f.init(
+                    (180 * @as(float, @floatFromInt(y)) / @as(f32, @floatFromInt(self.height))) - 90,
+                    (180 * @as(float, @floatFromInt(x)) / @as(f32, @floatFromInt(self.width))) - 90,
+                    0,
+                ));
             },
             else => {},
         }

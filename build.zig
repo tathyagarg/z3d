@@ -12,34 +12,56 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    for (targets) |t| {
+    const all_targets = b.option(bool, "all-targets", "Build for all targets") orelse false;
+
+    if (all_targets) {
+        for (targets) |t| {
+            const exe = b.addExecutable(.{
+                .name = "z3d",
+                .root_source_file = b.path("src/main.zig"),
+                .target = b.resolveTargetQuery(t),
+                .optimize = optimize,
+            });
+
+            if (b.resolveTargetQuery(t).result.os.tag == .linux) {
+                exe.linkSystemLibrary("SDL2");
+                exe.linkLibC();
+            } else {
+                const sdl_dep = b.dependency("SDL2", .{
+                    .optimize = .ReleaseFast,
+                    .target = b.resolveTargetQuery(t),
+                });
+                exe.linkLibrary(sdl_dep.artifact("SDL2"));
+            }
+
+            const target_out = b.addInstallArtifact(exe, .{ .dest_dir = .{ .override = .{
+                .custom = try t.zigTriple(b.allocator),
+            } } });
+
+            if (t.cpu_arch == .x86_64 and t.os_tag == .linux and t.abi == .gnu) {
+                const runner = b.addRunArtifact(exe);
+                const run_step = b.step("run", "Run the application");
+                run_step.dependOn(&runner.step);
+            }
+
+            b.getInstallStep().dependOn(&target_out.step);
+        }
+    } else {
         const exe = b.addExecutable(.{
             .name = "z3d",
             .root_source_file = b.path("src/main.zig"),
-            .target = b.resolveTargetQuery(t),
+            .target = target,
             .optimize = optimize,
         });
 
-        if (b.resolveTargetQuery(t).result.os.tag == .linux) {
-            exe.linkSystemLibrary("SDL2");
-            exe.linkLibC();
-        } else {
-            const sdl_dep = b.dependency("SDL2", .{
-                .optimize = .ReleaseFast,
-                .target = b.resolveTargetQuery(t),
-            });
-            exe.linkLibrary(sdl_dep.artifact("SDL2"));
-        }
+        exe.linkSystemLibrary("SDL2");
+        exe.linkLibC();
 
-        const target_out = b.addInstallArtifact(exe, .{ .dest_dir = .{ .override = .{
-            .custom = try t.zigTriple(b.allocator),
-        } } });
+        const target_out = b.addInstallArtifact(exe, .{});
 
-        if (t.cpu_arch == .x86_64 and t.os_tag == .linux and t.abi == .gnu) {
-            const runner = b.addRunArtifact(exe);
-            const run_step = b.step("run", "Run the application");
-            run_step.dependOn(&runner.step);
-        }
+        const runner = b.addRunArtifact(exe);
+        const run_step = b.step("run", "Run the application");
+        run_step.dependOn(&runner.step);
 
         b.getInstallStep().dependOn(&target_out.step);
     }
