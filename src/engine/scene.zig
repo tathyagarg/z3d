@@ -19,6 +19,14 @@ const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
 
 const RGB = @import("../systems/graphics/graphics.zig").RGB;
+const allocator = std.heap.page_allocator;
+
+pub const RenderingOption = struct {
+    x_start: usize = 0,
+    y_start: usize = 0,
+    x_end: usize = 0,
+    y_end: usize = 0,
+};
 
 pub const Scene = struct {
     label: []const u8,
@@ -26,6 +34,8 @@ pub const Scene = struct {
     lights: *ArrayList(Light),
     ray_casting_options: *const RayCastingOptions,
     camera: Camera,
+
+    cpu_count: usize,
 
     const Self = @This();
 
@@ -36,14 +46,16 @@ pub const Scene = struct {
         options: struct {
             label: []const u8 = "Untitled Scene",
             ray_casting_options: *const RayCastingOptions = &RayCastingOptions{},
+            cpu_count: usize = 0,
         },
-    ) Self {
+    ) !Self {
         return Self{
             .camera = camera,
             .objects = objects,
             .lights = lights,
             .label = options.label,
             .ray_casting_options = options.ray_casting_options,
+            .cpu_count = if (options.cpu_count == 0) try std.Thread.getCpuCount() else options.cpu_count,
         };
     }
 
@@ -53,14 +65,17 @@ pub const Scene = struct {
         }
     }
 
-    pub fn render(self: Self, frame_buffer: *[]RGB) void {
+    pub fn render_task(self: Self, frame_buffer: *[]RGB, rendering_options: RenderingOption) void {
         const scale: float = @tan(math.DEG_TO_RAD * self.ray_casting_options.fov * 0.5);
         const screen_aspect_ratio: float =
             @as(float, @floatFromInt(self.ray_casting_options.width)) /
             @as(float, @floatFromInt(self.ray_casting_options.height));
 
-        for (0..self.ray_casting_options.height) |j| {
-            for (0..self.ray_casting_options.width) |i| {
+        const y_end = if (rendering_options.y_end == 0) self.ray_casting_options.height else rendering_options.y_end;
+        const x_end = if (rendering_options.x_end == 0) self.ray_casting_options.width else rendering_options.x_end;
+
+        for (rendering_options.y_start..y_end) |j| {
+            for (rendering_options.x_start..x_end) |i| {
                 const x: float =
                     (2 * (@as(float, @floatFromInt(i)) + 0.5) /
                     @as(float, @floatFromInt(self.ray_casting_options.width)) - 1) *
@@ -88,5 +103,28 @@ pub const Scene = struct {
                 frame_buffer.*[j * self.ray_casting_options.width + i] = curr_pixel;
             }
         }
+    }
+
+    pub fn render(self: Self, frame_buffer: *[]RGB) !void {
+        var handles: std.ArrayList(std.Thread) = std.ArrayList(std.Thread).init(allocator);
+        defer handles.deinit();
+
+        const lines_per_thread = @divFloor(self.ray_casting_options.height, self.cpu_count);
+
+        for (0..self.cpu_count) |i| {
+            try handles.append(try std.Thread.spawn(.{}, Scene.render_task, .{
+                self,
+                frame_buffer,
+                RenderingOption{
+                    .x_start = 0,
+                    .y_start = i * lines_per_thread,
+                    .x_end = self.ray_casting_options.width,
+                    .y_end = (i + 1) * lines_per_thread,
+                },
+            }));
+        }
+
+        for (handles.items) |h|
+            h.join();
     }
 };

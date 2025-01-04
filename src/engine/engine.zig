@@ -51,6 +51,8 @@ pub const Engine = struct {
     frame_buffer: []RGB = undefined,
     scene: Scene,
 
+    prev: usize = 0,
+
     pub fn init(
         title: [*:0]const u8,
         x: u16,
@@ -96,12 +98,7 @@ pub const Engine = struct {
                 @as(usize, @intCast(height)),
         );
 
-        scene.render(&initial_frame_buf);
-        // for (0..height) |j| {
-        //     for (0..width) |i| {
-        //         std.debug.print("{any}\n", .{initial_frame_buf[j * width + i]});
-        //     }
-        // }
+        try scene.render(&initial_frame_buf);
 
         return Engine{
             .window = window,
@@ -139,9 +136,10 @@ pub const Engine = struct {
                 var phy = o.get_physics_engine() orelse continue;
                 try phy.update();
             }
-            self.scene.render(&self.frame_buffer);
+            try self.scene.render(&self.frame_buffer);
 
-            // const current = sdl.SDL_GetTicks();
+            const current = @as(usize, sdl.SDL_GetTicks());
+            std.debug.print("FPS: {d}\n", .{1000 / (current - self.prev)});
 
             for (0..self.height) |j| {
                 for (0..self.width) |i| {
@@ -149,13 +147,7 @@ pub const Engine = struct {
                     const r = rgb.r;
                     const g = rgb.g;
                     const b = rgb.b;
-                    if (sdl.SDL_SetRenderDrawColor(
-                        self.renderer,
-                        r,
-                        g,
-                        b,
-                        100,
-                    ) != 0) {
+                    if (sdl.SDL_SetRenderDrawColor(self.renderer, r, g, b, 100) != 0) {
                         std.debug.print("\nSetErr: {any} ({d} {d} {d} {any})\n", .{ sdl.SDL_GetError(), r, g, b, rgb });
                         return error.SetRenderDrawColorFailed;
                     }
@@ -172,6 +164,7 @@ pub const Engine = struct {
             }
 
             sdl.SDL_RenderPresent(self.renderer);
+            self.prev = current;
         }
     }
 };

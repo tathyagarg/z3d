@@ -109,7 +109,7 @@ pub fn main() !void {
         },
     };
 
-    const scene = Scene.init(
+    const scene = try Scene.init(
         cam,
         &scene_objects,
         &lights,
