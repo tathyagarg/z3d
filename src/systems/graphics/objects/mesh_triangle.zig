@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const math = @import("../../../core/math/math.zig");
 const float = @import("../../../core/constants.zig").FLOAT;
 const physics = @import("../../physics/physics.zig");
@@ -19,18 +21,18 @@ pub const MeshTriangle = struct {
     num_triangles: u32,
     textures: []const Vec2f,
 
-    material: *Material,
+    material: *const Material,
     physics: ?*physics.PhysicsEngine = null,
 
     const Self = @This();
 
     pub fn init(
-        vertices: *[*]Vec3f,
+        vertices: *const []*Vec3f,
         vertex_count: usize,
         vertex_indices: []const usize,
         num_triangles: u32,
         textures: []const Vec2f,
-        material: *Material,
+        material: *const Material,
         physics_engine: ?*physics.PhysicsEngine,
     ) Self {
         return Self{
@@ -49,11 +51,15 @@ pub const MeshTriangle = struct {
     }
 
     pub fn intersects(self: Self, ray: Ray, tn: *float, index: *usize, uv: *Vec2f) bool {
+        for (0..self.position.multi.point_count) |_| {
+            // std.debug.print("Point: {any}\n", .{self.position.multi.points[i]});
+        }
+
         var intersect: bool = false;
         for (0..self.num_triangles) |k| {
-            const v0: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 0]];
-            const v1: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 1]];
-            const v2: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 2]];
+            const v0: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 0]].*;
+            const v1: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 1]].*;
+            const v2: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 2]].*;
 
             var t: float = undefined;
             var u: float = undefined;
@@ -68,13 +74,14 @@ pub const MeshTriangle = struct {
                 intersect = true;
             }
         }
+
         return intersect;
     }
 
     pub fn eval_diffuse_color(self: Self, texture: Vec2f) Vec3f {
         // The diffuse color is a pattern, independent of `self` and it's properties. Thus, we're free to discard it here.
         _ = .{self};
-        const scale: usize = 20;
+        const scale: usize = 4;
         const pattern: float = @as(
             float,
             @floatFromInt(
@@ -98,12 +105,12 @@ pub const MeshTriangle = struct {
         normal: *Vec3f,
         st: *Vec2f,
     ) void {
-        const v0: Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 0]];
-        const v1: Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 1]];
-        const v2: Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 2]];
+        const v0: *Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 0]];
+        const v1: *Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 1]];
+        const v2: *Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 2]];
 
-        const e0: Vec3f = v1.subtract(v0).normalize();
-        const e1: Vec3f = v2.subtract(v1).normalize();
+        const e0: Vec3f = v1.subtract(v0.*).normalize();
+        const e1: Vec3f = v2.subtract(v1.*).normalize();
 
         normal.* = e0.cross(e1).normalize();
 

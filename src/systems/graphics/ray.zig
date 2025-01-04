@@ -141,8 +141,8 @@ pub const Ray = struct {
             var index_k: usize = undefined;
             var uv_k: Vec2f = undefined;
             const intersects = switch (objects.items[k]) {
-                .sphere => objects.items[k].sphere.intersects(self, &t_near_k),
-                .mesh_triangle => objects.items[k].mesh_triangle.intersects(self, &t_near_k, &index_k, &uv_k),
+                .sphere => |s| s.intersects(self, &t_near_k),
+                .mesh_triangle => |m| m.intersects(self, &t_near_k, &index_k, &uv_k),
             };
 
             if (intersects and t_near_k < t_near.*) {

@@ -13,6 +13,7 @@ const transform = z3d.transform;
 const EventHandler = z3d.event_handler.EventHandler;
 
 const Vec3 = math.Vec3(f32);
+const Vec2 = math.Vec2(f32);
 const allocator = std.testing.allocator;
 
 const HEIGHT = 500;
@@ -46,6 +47,36 @@ test "window initialization" {
         };
         try scene_objects.append(sphere);
     }
+
+    var vertices_data = [_]Vec3{
+        Vec3.init(-5, -3, -6),
+        Vec3.init(5, -3, -6),
+        Vec3.init(5, -3, -16),
+        Vec3.init(-5, -3, -16),
+    };
+    const vertices: *[*]Vec3 = @ptrCast(&vertices_data);
+
+    const vertex_indices = [6]usize{ 0, 1, 3, 1, 2, 3 };
+    const textures = [4]Vec2{
+        Vec2.init(0, 0),
+        Vec2.init(1, 0),
+        Vec2.init(1, 1),
+        Vec2.init(0, 1),
+    };
+
+    const mesh_mat = graphics.material.Material{
+        .material_type = graphics.material.MaterialType.DIFFUSE_AND_GLOSSY,
+    };
+
+    try scene_objects.append(objects.Object{ .mesh_triangle = objects.MeshTriangle.init(
+        vertices,
+        vertices_data.len,
+        &vertex_indices,
+        2,
+        &textures,
+        &mesh_mat,
+        null,
+    ) });
 
     const light = Light{
         .position = Vec3.init(0, 0, 0),
