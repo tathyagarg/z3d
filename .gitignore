@@ -3,3 +3,4 @@ zig-out/
 notes/
 *.note
 *.log
+perf.*

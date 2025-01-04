@@ -188,7 +188,10 @@ pub fn cast_ray(
                 var light_amount: Vec3f = Vec3f.zero();
                 var specular_color: Vec3f = Vec3f.zero();
 
-                const shadow_point_origin = if (ray.direction.dot(normal) < 0) hit_point.add(normal.multiply(options.bias)) else hit_point.subtract(normal.multiply(options.bias));
+                const shadow_point_origin =
+                    if (ray.direction.dot(normal) < 0) hit_point.add(normal.multiply(options.bias)) //
+                else hit_point.subtract(normal.multiply(options.bias));
+
                 for (lights.items) |light| {
                     var light_direction = light.position.subtract(hit_point);
                     const light_dist_sqr = light_direction.dot(light_direction);
@@ -219,15 +222,19 @@ pub fn cast_ray(
                     const reflection_direction = light_direction.negate().subtract(
                         normal.multiply(2 * light_direction.negate().dot(normal)),
                     );
-                    specular_color = specular_color.add(
-                        light.intensity.multiply(
-                            std.math.pow(
-                                float,
-                                @max(0, -reflection_direction.dot(ray.direction)),
-                                hit_object.get_material().specular_exponent,
+
+                    const interm = reflection_direction.dot(ray.direction);
+                    if (interm > 0) {
+                        specular_color = specular_color.add(
+                            light.intensity.multiply(
+                                std.math.pow(
+                                    float,
+                                    interm,
+                                    material.specular_exponent,
+                                ),
                             ),
-                        ),
-                    );
+                        );
+                    }
                 }
                 hit_color = hit_object
                     .eval_diffuse_color(texture)

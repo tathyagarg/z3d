@@ -4,11 +4,7 @@ const float = @import("../core/constants.zig").FLOAT;
 
 const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
-
-pub const Bounds = struct {
-    minimum: Vec3f,
-    maximum: Vec3f,
-};
+const Bounds = math.Bounds(Vec3f);
 
 pub const SinglePointHandler = struct {
     point: *Vec3f,
@@ -27,7 +23,7 @@ pub const MultiPointHandler = struct {
         var minimum = Vec3f.infinity();
         var maximum = Vec3f.infinity().negate();
 
-        for (self.points) |*p| {
+        for (self.points) |p| {
             minimum.x = @min(p.x, minimum.x);
             minimum.y = @min(p.y, minimum.y);
             minimum.z = @min(p.z, minimum.z);

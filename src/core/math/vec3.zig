@@ -99,8 +99,12 @@ pub fn Vec3(comptime T: type) type {
             };
         }
 
-        pub fn subtract(self: Self, other: Self) Self {
-            return self.add(other.negate());
+        pub inline fn subtract(self: Self, other: Self) Self {
+            return Self{
+                .x = self.x - other.x,
+                .y = self.y - other.y,
+                .z = self.z - other.z,
+            };
         }
 
         pub fn multiply(self: Self, scalar: T) Self {
@@ -142,7 +146,7 @@ pub fn Vec3(comptime T: type) type {
         /// The vector `a` is normalized to give vector `a_hat` through:
         /// a_hat = a / ||a||
         pub fn normalize(self: Self) Self {
-            const len_sqr: T = pow(T, self.norm(), 2);
+            const len_sqr = self.x * self.x + self.y * self.y + self.z * self.z;
             if (len_sqr > 0) {
                 const inv_len: T = 1 / sqrt(len_sqr); // 1 / len, inverted length
                 return self.multiply(inv_len);

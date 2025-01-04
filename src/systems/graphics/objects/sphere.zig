@@ -41,10 +41,21 @@ pub const Sphere = struct {
     }
 
     pub fn intersects(self: Self, ray: Ray, t: *float) bool {
-        const L: Vec3f = ray.origin.subtract(self.position.single.point.*);
+        // If the ray is going in the opposite direction of the sphere, return false
+        if ((self.position.single.point.x < ray.origin.x and ray.direction.x > 0) or
+            (self.position.single.point.y < ray.origin.y and ray.direction.y > 0) or
+            (self.position.single.point.z < ray.origin.z and ray.direction.z > 0) or
+            (self.position.single.point.x > ray.origin.x and ray.direction.x < 0) or
+            (self.position.single.point.y > ray.origin.y and ray.direction.y < 0) or
+            (self.position.single.point.z > ray.origin.z and ray.direction.z < 0)) return false;
+
+        const origin: Vec3f = ray.origin.subtract(self.position.single.point.*);
         const a: float = ray.direction.dot(ray.direction);
-        const b: float = 2 * ray.direction.dot(L);
-        const c: float = L.dot(L) - self.radius_sqr;
+        const b: float = 2 * ray.direction.dot(origin);
+        const c: float = origin.dot(origin) - self.radius_sqr;
+
+        const disc = b * b - 4 * a * c;
+        if (disc < 0) return false;
 
         var t0: float = undefined;
         var t1: float = undefined;

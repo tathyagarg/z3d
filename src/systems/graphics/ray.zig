@@ -39,18 +39,18 @@ pub const Ray = struct {
         const det: float = edge1.dot(pvec);
         if (det <= 0) return false;
 
+        const inv_det: float = 1 / det;
         const tvec: Vec3f = self.origin.subtract(v0);
-        u.* = tvec.dot(pvec);
-        if (u.* < 0 or u.* > det) return false;
+        const uval = tvec.dot(pvec) * inv_det;
+        if (uval < 0 or uval > 1) return false;
 
         const qvec: Vec3f = tvec.cross(edge1);
-        v.* = self.direction.dot(qvec);
-        if (v.* < 0 or (u.* + v.*) > det) return false;
+        const vval = self.direction.dot(qvec) * inv_det;
+        if (vval < 0 or (uval + vval) > 1) return false;
 
-        const inv_det: float = 1 / det;
         t.* = edge2.dot(qvec) * inv_det;
-        u.* *= inv_det;
-        v.* *= inv_det;
+        u.* = uval;
+        v.* = vval;
 
         return true;
     }
@@ -133,20 +133,20 @@ pub const Ray = struct {
         uv: *Vec2f,
         hit_object: *Object,
     ) bool {
-        hit_object.* = undefined;
         var hit: bool = false;
 
-        for (0..objects.items.len) |k| {
+        for (objects.items) |obj| {
             var t_near_k: float = std.math.inf(float);
             var index_k: usize = undefined;
             var uv_k: Vec2f = undefined;
-            const intersects = switch (objects.items[k]) {
+
+            const intersects = switch (obj) {
                 .sphere => |s| s.intersects(self, &t_near_k),
                 .mesh_triangle => |m| m.intersects(self, &t_near_k, &index_k, &uv_k),
             };
 
             if (intersects and t_near_k < t_near.*) {
-                hit_object.* = objects.items[k];
+                hit_object.* = obj;
                 t_near.* = t_near_k;
                 index.* = index_k;
                 uv.* = uv_k;

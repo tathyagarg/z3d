@@ -18,3 +18,10 @@ pub const PixelComputationOptions = struct {
     screen_width: u32 = constants.SCREEN_WIDTH,
     screen_height: u32 = constants.SCREEN_HEIGHT,
 };
+
+pub fn Bounds(comptime T: type) type {
+    return struct {
+        minimum: T,
+        maximum: T,
+    };
+}

@@ -39,6 +39,7 @@ pub fn build(b: *std.Build) !void {
             } } });
 
             if (t.cpu_arch == .x86_64 and t.os_tag == .linux and t.abi == .gnu) {
+                std.debug.print("{any}\n", .{exe});
                 const runner = b.addRunArtifact(exe);
                 const run_step = b.step("run", "Run the application");
                 run_step.dependOn(&runner.step);
@@ -51,7 +52,7 @@ pub fn build(b: *std.Build) !void {
             .name = "z3d",
             .root_source_file = b.path("src/main.zig"),
             .target = target,
-            .optimize = optimize,
+            .optimize = .ReleaseFast,
         });
 
         exe.linkSystemLibrary("SDL2");

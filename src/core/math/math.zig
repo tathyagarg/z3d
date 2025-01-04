@@ -4,6 +4,7 @@ const sqrt = std.math.sqrt;
 pub const utilslib = @import("utils.zig");
 pub const appropriate_division = utilslib.appropriate_division;
 pub const PixelComputationOptions = utilslib.PixelComputationOptions;
+pub const Bounds = utilslib.Bounds;
 
 // A 3 dimensional vector
 // Can be used to represent direction, a point, etc.
@@ -28,7 +29,7 @@ pub const Vec2i32 = Vec2lib.Vec2i32;
 pub const INCH_TO_MM = 25.4;
 pub const DEG_TO_RAD: f32 = std.math.pi / @as(f32, @floatFromInt(180));
 
-pub fn solve_quadratic(a: f32, b: f32, c: f32, x0: *f32, x1: *f32) bool {
+pub inline fn solve_quadratic(a: f32, b: f32, c: f32, x0: *f32, x1: *f32) bool {
     const discriminant = b * b - 4 * a * c;
     if (discriminant < 0) {
         return false;
