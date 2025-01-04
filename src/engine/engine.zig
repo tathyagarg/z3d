@@ -76,6 +76,9 @@ pub const Engine = struct {
             std.debug.print("{any}\n", .{sdl.SDL_GetError()});
             return error.WindowInitializationFailed;
         };
+        _ = sdl.SDL_SetWindowGrab(window, sdl.SDL_TRUE);
+        _ = sdl.SDL_ShowCursor(sdl.SDL_DISABLE);
+        _ = sdl.SDL_SetRelativeMouseMode(sdl.SDL_TRUE);
 
         const renderer = sdl.SDL_CreateRenderer(
             window,

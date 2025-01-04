@@ -6,6 +6,7 @@
 <p align="center">
 <img src="https://img.shields.io/badge/zig-F7A41D?style=for-the-badge&logo=zig&logoColor=white"/>
 <img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white"/>
+<img src="https://img.shields.io/badge/OpenGL-5586A4?style=for-the-badge&logo=opengl&logoColor=white"/>
 </p>
 
 A primitive 3D game engine written in Zig

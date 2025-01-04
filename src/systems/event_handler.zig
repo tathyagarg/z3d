@@ -59,15 +59,14 @@ pub const EventHandler = packed struct {
                 }
             },
             sdl.SDL_MOUSEMOTION => {
-                var x: i32, var y: i32 = .{ undefined, undefined };
-                _ = sdl.SDL_GetMouseState(&x, &y);
+                const x: i32, const y: i32 = .{ event.motion.xrel, event.motion.yrel };
                 position.rotate(Vec3f.init(
-                    (180 * @as(float, @floatFromInt(y)) / @as(f32, @floatFromInt(self.height))) - 90,
-                    (180 * @as(float, @floatFromInt(x)) / @as(f32, @floatFromInt(self.width))) - 90,
+                    (180 * @as(float, @floatFromInt(y)) / @as(f32, @floatFromInt(self.height))),
+                    (180 * @as(float, @floatFromInt(x)) / @as(f32, @floatFromInt(self.width))),
                     0,
                 ));
             },
-            else => {},
+            else => {}, // Ignore other events
         }
     }
 };

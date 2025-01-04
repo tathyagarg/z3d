@@ -64,11 +64,11 @@ pub const PositionHandler = union(enum) {
         _ = .{amount};
         switch (self.*) {
             .single => |s| {
-                s.direction.* = amount;
+                s.direction.x = std.math.clamp(s.direction.x + amount.x, -90, 90);
+                s.direction.y += amount.y;
+                s.direction.z += amount.z;
             },
-            .multi => {
-                unreachable;
-            }, // TODO: IMPLEMENT THIS
+            .multi => unreachable, // TODO: IMPLEMENT THIS
         }
     }
 
