@@ -55,6 +55,13 @@ pub const EventHandler = packed struct {
                             -@sin(direction.y * math.DEG_TO_RAD),
                         ));
                     },
+                    sdl.SDLK_LSHIFT => {
+                        position.translate(Vec3f.init(
+                            0,
+                            -1,
+                            0,
+                        ));
+                    },
                     else => {},
                 }
             },

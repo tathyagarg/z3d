@@ -42,12 +42,12 @@ pub const Sphere = struct {
 
     pub fn intersects(self: Self, ray: Ray, t: *float) bool {
         // If the ray is going in the opposite direction of the sphere, return false
-        if ((self.position.single.point.x < ray.origin.x and ray.direction.x > 0) or
-            (self.position.single.point.y < ray.origin.y and ray.direction.y > 0) or
-            (self.position.single.point.z < ray.origin.z and ray.direction.z > 0) or
-            (self.position.single.point.x > ray.origin.x and ray.direction.x < 0) or
-            (self.position.single.point.y > ray.origin.y and ray.direction.y < 0) or
-            (self.position.single.point.z > ray.origin.z and ray.direction.z < 0)) return false;
+        // if ((self.position.single.point.x < ray.origin.x and ray.direction.x > 0) or
+        //     (self.position.single.point.y < ray.origin.y and ray.direction.y > 0) or
+        //     (self.position.single.point.z < ray.origin.z and ray.direction.z > 0) or
+        //     (self.position.single.point.x > ray.origin.x and ray.direction.x < 0) or
+        //     (self.position.single.point.y > ray.origin.y and ray.direction.y < 0) or
+        //     (self.position.single.point.z > ray.origin.z and ray.direction.z < 0)) return false;
 
         const origin: Vec3f = ray.origin.subtract(self.position.single.point.*);
         const a: float = ray.direction.dot(ray.direction);
@@ -69,16 +69,11 @@ pub const Sphere = struct {
         return true;
     }
 
-    pub fn get_surface_props(
+    pub inline fn get_surface_props(
         self: Self,
         P: *const Vec3f,
-        I: *const Vec3f,
-        index: usize,
-        uv: *Vec2f,
         normal: *Vec3f,
-        st: *Vec2f,
     ) void {
         normal.* = (P.subtract(self.position.single.point.*)).normalize();
-        _ = .{ I, index, uv, st };
     }
 };

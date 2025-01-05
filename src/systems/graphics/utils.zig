@@ -120,7 +120,6 @@ pub fn cast_ray(
         var texture: Vec2f = undefined;
         hit_object.get_surface_props(
             &hit_point,
-            &ray.direction,
             index,
             &uv,
             &normal,

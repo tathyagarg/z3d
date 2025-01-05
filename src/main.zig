@@ -49,36 +49,37 @@ pub fn main() !void {
     }
 
     const vertices_data: []*Vec3 = @constCast(&[_]*Vec3{
-        @constCast(&Vec3.init(-8, -3, 8)),
-        @constCast(&Vec3.init(8, -3, 8)),
-        @constCast(&Vec3.init(8, -3, -8)),
-        @constCast(&Vec3.init(-8, -3, -8)),
+        @constCast(&Vec3.init(-10, -10, -10)),
+        @constCast(&Vec3.init(-5, -10, -10)),
+        @constCast(&Vec3.init(-5, -5, -10)),
+        @constCast(&Vec3.init(-10, -5, -10)),
+        @constCast(&Vec3.init(-10, -10, -5)),
+        @constCast(&Vec3.init(-5, -10, -5)),
+        @constCast(&Vec3.init(-5, -5, -5)),
+        @constCast(&Vec3.init(-10, -5, -5)),
     });
-
-    const vertex_indices = [6]usize{ 0, 1, 3, 1, 2, 3 };
-    const textures = [4]Vec2{
-        Vec2.init(0, 0),
-        Vec2.init(1, 0),
-        Vec2.init(1, 1),
-        Vec2.init(0, 1),
-    };
 
     const mesh_mat = graphics.material.Material{
         .material_type = graphics.material.MaterialType.DIFFUSE_AND_GLOSSY,
     };
 
-    try scene_objects.append(objects.Object{ .mesh_triangle = objects.MeshTriangle.init(
-        &vertices_data,
-        vertices_data.len,
-        &vertex_indices,
-        2,
-        &textures,
-        &mesh_mat,
-        null,
-    ) });
+    try scene_objects.append(
+        objects.Object{
+            .mesh_triangle = objects.Cuboid(
+                &vertices_data,
+                &mesh_mat,
+                null,
+            ),
+        },
+    );
 
     const light = Light{
         .position = Vec3.init(0, 0, 0),
+        .intensity = Vec3.diagonal(0.9),
+    };
+
+    const light2 = Light{
+        .position = Vec3.init(-7.5, -7.5, -7.5),
         .intensity = Vec3.diagonal(0.9),
     };
 
@@ -86,6 +87,7 @@ pub fn main() !void {
     defer lights.deinit();
 
     try lights.append(light);
+    try lights.append(light2);
 
     // const cam = Camera{
     //     .position = &transform.PositionHandler{

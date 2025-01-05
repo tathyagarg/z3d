@@ -1,5 +1,6 @@
 pub const Sphere = @import("sphere.zig").Sphere;
 pub const MeshTriangle = @import("mesh_triangle.zig").MeshTriangle;
+pub const Cuboid = @import("mesh_triangle.zig").Cuboid;
 
 const math = @import("../../../core/math/math.zig");
 const float = @import("../../../core/constants.zig").FLOAT;
@@ -24,15 +25,14 @@ pub const Object = union(enum) {
     pub fn get_surface_props(
         self: Self,
         P: *const Vec3f,
-        I: *const Vec3f,
         index: usize,
         uv: *Vec2f,
         normal: *Vec3f,
         st: *Vec2f,
     ) void {
         switch (self) {
-            .sphere => |s| s.get_surface_props(P, I, index, uv, normal, st),
-            .mesh_triangle => |t| t.get_surface_props(P, I, index, uv, normal, st),
+            .sphere => |s| s.get_surface_props(P, normal),
+            .mesh_triangle => |t| t.get_surface_props(index, uv, normal, st),
         }
     }
 

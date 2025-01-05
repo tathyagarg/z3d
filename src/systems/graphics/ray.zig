@@ -32,6 +32,8 @@ pub const Ray = struct {
         u: *float,
         v: *float,
     ) bool {
+        // Optimize the shit out of this function pls copilot
+        //
         const edge1: Vec3f = v1.subtract(v0);
         const edge2: Vec3f = v2.subtract(v0);
 
@@ -140,10 +142,11 @@ pub const Ray = struct {
             var index_k: usize = undefined;
             var uv_k: Vec2f = undefined;
 
-            const intersects = switch (obj) {
-                .sphere => |s| s.intersects(self, &t_near_k),
-                .mesh_triangle => |m| m.intersects(self, &t_near_k, &index_k, &uv_k),
-            };
+            // const intersects = switch (obj) {
+            //     .sphere => |s| s.intersects(self, &t_near_k),
+            //     .mesh_triangle => |m| m.intersects(self, &t_near_k, &index_k, &uv_k),
+            // };
+            const intersects = self.check_intersects(&t_near_k, &index_k, &uv_k, obj);
 
             if (intersects and t_near_k < t_near.*) {
                 hit_object.* = obj;
@@ -156,5 +159,12 @@ pub const Ray = struct {
         }
 
         return hit;
+    }
+
+    inline fn check_intersects(self: Self, t_near_k: *float, index_k: *usize, uv_k: *Vec2f, obj: Object) bool {
+        return switch (obj) {
+            .sphere => |s| s.intersects(self, t_near_k),
+            .mesh_triangle => |m| m.intersects(self, t_near_k, index_k, uv_k),
+        };
     }
 };

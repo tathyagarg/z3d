@@ -115,9 +115,10 @@ pub const MeshTriangle = struct {
     // - Use SIMD to check multiple triangles at once.
             
         // Bounding box check for optimizations
-        if (!self.intersect_ray_aabb(ray)) {
-            return false;
-        }
+        // if (!self.intersect_ray_aabb(ray)) {
+        //     return false;
+        // }
+
 
         var intersect: bool = false;
         for (0..self.num_triangles) |k| {
@@ -160,10 +161,8 @@ pub const MeshTriangle = struct {
         );
     }
 
-    pub fn get_surface_props(
+    pub inline fn get_surface_props(
         self: Self,
-        P: *const Vec3f,
-        I: *const Vec3f,
         index: usize,
         uv: *Vec2f,
         normal: *Vec3f,
@@ -186,6 +185,42 @@ pub const MeshTriangle = struct {
             .add(st1.multiply(uv.x))
             .add(st2.multiply(uv.y));
 
-        _ = .{ self, P, I };
+        _ = .{ self };
     }
 };
+
+pub fn Cuboid(
+    vertices: *const []*Vec3f,
+    material: *const Material,
+    physics_engine: ?*physics.PhysicsEngine,
+) MeshTriangle {
+    return MeshTriangle.init(
+        vertices,
+        8,
+        &.{
+            0, 1, 2,
+            2, 3, 0,
+            4, 5, 6,
+            6, 7, 4,
+            0, 4, 5,
+            5, 1, 0,
+            1, 5, 6,
+            6, 2, 1,
+            2, 6, 7,
+            7, 3, 2,
+            3, 7, 4,
+            4, 0, 3,
+        },
+        12,
+        &.{
+            Vec2f{ .x = 0, .y = 0 },
+            Vec2f{ .x = 1, .y = 0 },
+            Vec2f{ .x = 1, .y = 1 },
+            Vec2f{ .x = 0, .y = 1 },
+            Vec2f{ .x = 0, .y = 0 },
+            Vec2f{ .x = 1, .y = 0 },
+        },
+        material,
+        physics_engine,
+    );
+}
