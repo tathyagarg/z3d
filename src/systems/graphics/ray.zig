@@ -32,27 +32,36 @@ pub const Ray = struct {
         u: *float,
         v: *float,
     ) bool {
-        // Optimize the shit out of this function pls copilot
-        //
-        const edge1: Vec3f = v1.subtract(v0);
-        const edge2: Vec3f = v2.subtract(v0);
+        const v0v1 = v1.subtract(v0);
+        const v0v2 = v2.subtract(v0);
 
-        const pvec: Vec3f = self.direction.cross(edge2);
-        const det: float = edge1.dot(pvec);
-        if (det <= 0) return false;
+        const normal = v0v1.cross(v0v2);
 
-        const inv_det: float = 1 / det;
-        const tvec: Vec3f = self.origin.subtract(v0);
-        const uval = tvec.dot(pvec) * inv_det;
-        if (uval < 0 or uval > 1) return false;
+        const n_dot_ray = normal.dot(self.direction);
+        if (@abs(n_dot_ray) < 1e-8) return false;
 
-        const qvec: Vec3f = tvec.cross(edge1);
-        const vval = self.direction.dot(qvec) * inv_det;
-        if (vval < 0 or (uval + vval) > 1) return false;
+        t.* = (normal.dot(v0) - normal.dot(self.origin)) / n_dot_ray;
+        if (t.* < 0) return false;
 
-        t.* = edge2.dot(qvec) * inv_det;
-        u.* = uval;
-        v.* = vval;
+        const P = self.at(t.*);
+        const area = normal.norm() / 2;
+        var C: Vec3f = undefined;
+
+        const v1p = P.subtract(v1);
+        const v1v2 = v2.subtract(v1);
+        C = v1v2.cross(v1p);
+        u.* = C.norm() / (2 * area);
+        if (normal.dot(C) < 0) return false;
+
+        const v2p = P.subtract(v2);
+        const v2v0 = v0.subtract(v2);
+        C = v2v0.cross(v2p);
+        v.* = C.norm() / (2 * area);
+        if (normal.dot(C) < 0) return false;
+
+        const v0p = P.subtract(v0);
+        C = v0v1.cross(v0p);
+        if (normal.dot(C) < 0) return false;
 
         return true;
     }
@@ -161,7 +170,13 @@ pub const Ray = struct {
         return hit;
     }
 
-    inline fn check_intersects(self: Self, t_near_k: *float, index_k: *usize, uv_k: *Vec2f, obj: Object) bool {
+    inline fn check_intersects(
+        self: Self,
+        t_near_k: *float,
+        index_k: *usize,
+        uv_k: *Vec2f,
+        obj: Object,
+    ) bool {
         return switch (obj) {
             .sphere => |s| s.intersects(self, t_near_k),
             .mesh_triangle => |m| m.intersects(self, t_near_k, index_k, uv_k),
