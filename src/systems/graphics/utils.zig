@@ -235,6 +235,8 @@ pub fn cast_ray(
                         );
                     }
                 }
+                // texture
+                // std.debug.print("texture: {any}\n", .{texture});
                 hit_color = hit_object
                     .eval_diffuse_color(texture)
                     .direct_multiplication(light_amount)

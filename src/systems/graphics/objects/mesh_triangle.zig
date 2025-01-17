@@ -17,6 +17,8 @@ const Ray = @import("../ray.zig").Ray;
 const Material = @import("../material.zig").Material;
 const ArrayList = @import("std").ArrayList;
 
+const RGB = @import("../graphics.zig").RGB;
+
 pub const MeshTriangle = struct {
     position: position.PositionHandler,
     vertex_indices: []const usize,
@@ -144,20 +146,25 @@ pub const MeshTriangle = struct {
 
     pub fn eval_diffuse_color(self: Self, texture: Vec2f) Vec3f {
         // The diffuse color is a pattern, independent of `self` and it's properties. Thus, we're free to discard it here.
-        _ = .{self};
-        const scale: usize = 4;
-        const pattern: float = @as(
-            float,
-            @floatFromInt(
-                @as(u8, @intFromBool(@mod(texture.x * scale, 1) > 0.5)) ^
-                    @as(u8, @intFromBool(@mod(texture.y * scale, 1) > 0.5)),
-            ),
+        _ = .{ self, texture };
+        std.debug.print("Texture: {}, {}\n", .{ texture.x, texture.y });
+        return self.material.diffuse_color.mix(
+            (RGB{ .r = 0, .g = 0, .b = 0 }).rgb_to_vec(),
+            texture.x - texture.y,
         );
+        // const scale: usize = 4;
+        // const pattern: float = @as(
+        //     float,
+        //     @floatFromInt(
+        //         @as(u8, @intFromBool(@mod(texture.x * scale, 1) > 0.5)) ^
+        //             @as(u8, @intFromBool(@mod(texture.y * scale, 1) > 0.5)),
+        //     ),
+        // );
 
-        return (Vec3f{ .x = 0.82, .y = 0.235, .z = 0.03 }).mix(
-            Vec3f{ .x = 0.937, .y = 0.937, .z = 0.235 },
-            pattern,
-        );
+        // return (Vec3f{ .x = 0.82, .y = 0.235, .z = 0.03 }).mix(
+        //     Vec3f{ .x = 0.937, .y = 0.937, .z = 0.235 },
+        //     pattern,
+        // );
     }
 
     pub inline fn get_surface_props(
@@ -183,8 +190,6 @@ pub const MeshTriangle = struct {
         st.* = st0.multiply(1 - uv.x - uv.y)
             .add(st1.multiply(uv.x))
             .add(st2.multiply(uv.y));
-
-        _ = .{self};
     }
 };
 
@@ -212,12 +217,12 @@ pub fn Cuboid(
         },
         12,
         &.{
-            Vec2f{ .x = 0, .y = 0 },
             Vec2f{ .x = 1, .y = 0 },
-            Vec2f{ .x = 1, .y = 1 },
             Vec2f{ .x = 0, .y = 1 },
-            Vec2f{ .x = 0, .y = 0 },
             Vec2f{ .x = 1, .y = 0 },
+            Vec2f{ .x = 0, .y = 1 },
+            Vec2f{ .x = 1, .y = 0 },
+            Vec2f{ .x = 0, .y = 1 },
         },
         material,
         physics_engine,

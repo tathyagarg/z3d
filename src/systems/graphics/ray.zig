@@ -32,38 +32,26 @@ pub const Ray = struct {
         u: *float,
         v: *float,
     ) bool {
-        const v0v1 = v1.subtract(v0);
-        const v0v2 = v2.subtract(v0);
+        const e0 = v0.subtract(v1);
+        const e1 = v0.subtract(v2);
 
-        const normal = v0v1.cross(v0v2);
+        const pvec = self.direction.cross(e1);
+        const det = e0.dot(pvec);
 
-        const n_dot_ray = normal.dot(self.direction);
-        if (@abs(n_dot_ray) < 1e-8) return false;
+        if (@abs(det) < 1e-8) return false;
 
-        t.* = (normal.dot(v0) - normal.dot(self.origin)) / n_dot_ray;
-        if (t.* < 0) return false;
+        const inv_det = 1.0 / det;
+        const tvec = self.origin.subtract(v2);
 
-        const P = self.at(t.*);
-        const area = normal.norm() / 2;
-        var C: Vec3f = undefined;
+        u.* = tvec.dot(pvec) * inv_det;
+        if (u.* < 0 or u.* > 1) return false;
 
-        const v1p = P.subtract(v1);
-        const v1v2 = v2.subtract(v1);
-        C = v1v2.cross(v1p);
-        u.* = C.norm() / (2 * area);
-        if (normal.dot(C) < 0) return false;
+        const qvec = tvec.cross(e0);
+        v.* = self.direction.dot(qvec) * inv_det;
+        if (v.* < 0 or u.* + v.* > 1) return false;
 
-        const v2p = P.subtract(v2);
-        const v2v0 = v0.subtract(v2);
-        C = v2v0.cross(v2p);
-        v.* = C.norm() / (2 * area);
-        if (normal.dot(C) < 0) return false;
-
-        const v0p = P.subtract(v0);
-        C = v0v1.cross(v0p);
-        if (normal.dot(C) < 0) return false;
-
-        return true;
+        t.* = e1.dot(qvec) * inv_det;
+        return t.* > 1e-8;
     }
 
     pub fn reflection(self: Self, normal: Vec3f) Vec3f {

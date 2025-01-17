@@ -11,6 +11,7 @@ const Light = graphics.Light;
 const Camera = engine.Camera;
 const transform = z3d.transform;
 const EventHandler = z3d.event_handler.EventHandler;
+const RGB = graphics.RGB;
 
 const Vec3 = math.Vec3(f32);
 const Vec2 = math.Vec2(f32);
@@ -49,18 +50,23 @@ pub fn main() !void {
     }
 
     const vertices_data: []*Vec3 = @constCast(&[_]*Vec3{
-        @constCast(&Vec3.init(-10, -10, -10)),
-        @constCast(&Vec3.init(-5, -10, -10)),
-        @constCast(&Vec3.init(-5, -5, -10)),
-        @constCast(&Vec3.init(-10, -5, -10)),
-        @constCast(&Vec3.init(-10, -10, -5)),
-        @constCast(&Vec3.init(-5, -10, -5)),
-        @constCast(&Vec3.init(-5, -5, -5)),
-        @constCast(&Vec3.init(-10, -5, -5)),
+        @constCast(&Vec3.init(9, 15, 15)),
+        @constCast(&Vec3.init(15, 15, 15)),
+        @constCast(&Vec3.init(15, 15, 9)),
+        @constCast(&Vec3.init(9, 15, 9)),
+        @constCast(&Vec3.init(9, 9, 15)),
+        @constCast(&Vec3.init(15, 9, 15)),
+        @constCast(&Vec3.init(15, 9, 9)),
+        @constCast(&Vec3.init(9, 9, 9)),
     });
 
     const mesh_mat = graphics.material.Material{
         .material_type = graphics.material.MaterialType.DIFFUSE_AND_GLOSSY,
+        .diffuse_color = (RGB{
+            .r = 132,
+            .g = 195,
+            .b = 190,
+        }).rgb_to_vec(),
     };
 
     try scene_objects.append(
@@ -78,16 +84,16 @@ pub fn main() !void {
         .intensity = Vec3.diagonal(0.9),
     };
 
-    const light2 = Light{
-        .position = Vec3.init(-7.5, -7.5, -7.5),
-        .intensity = Vec3.diagonal(0.9),
-    };
+    // const light2 = Light{
+    //     .position = Vec3.init(-7.5, -7.5, -7.5),
+    //     .intensity = Vec3.diagonal(0.9),
+    // };
 
     var lights = std.ArrayList(Light).init(allocator);
     defer lights.deinit();
 
     try lights.append(light);
-    try lights.append(light2);
+    // try lights.append(light2);
 
     // const cam = Camera{
     //     .position = &transform.PositionHandler{
