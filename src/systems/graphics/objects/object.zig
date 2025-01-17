@@ -46,7 +46,10 @@ pub const Object = union(enum) {
     pub fn eval_diffuse_color(self: Self, texture: Vec2f) Vec3f {
         return switch (self) {
             .mesh_triangle => |t| t.eval_diffuse_color(texture),
-            else => self.get_material().diffuse_color,
+            else => switch (self.get_material().texture) {
+                .SOLID_COLOR => |color| color,
+                .TEXTURE_FILE => unreachable,
+            },
         };
     }
 

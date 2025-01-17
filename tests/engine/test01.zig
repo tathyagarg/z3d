@@ -1,4 +1,4 @@
-const z3d = @import("root.zig");
+const z3d = @import("z3d");
 const std = @import("std");
 
 const engine = z3d.engine;
@@ -12,7 +12,6 @@ const Camera = engine.Camera;
 const transform = z3d.transform;
 const EventHandler = z3d.event_handler.EventHandler;
 const RGB = graphics.RGB;
-const Texture = graphics.material.Texture;
 
 const Vec3 = math.Vec3(f32);
 const Vec2 = math.Vec2(f32);
@@ -21,7 +20,7 @@ const allocator = std.heap.page_allocator;
 const HEIGHT = 400;
 const WIDTH = 400;
 
-pub fn main() !void {
+test "test01" {
     var scene_objects = std.ArrayList(objects.Object).init(allocator);
     defer scene_objects.deinit();
 
@@ -35,10 +34,12 @@ pub fn main() !void {
     };
 
     const colors = [_]*graphics.material.Material{
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(1, 0, 0) } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(0, 0, 1) } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(1, 1, 0) } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(0, 1, 1) } }),
+        @constCast(&graphics.material.Material{ .diffuse_color = Vec3.init(1, 0, 0) }),
+        //@constCast(&graphics.material.Material{ .diffuse_color = Vec3.init(0, 1, 0) }),
+        @constCast(&graphics.material.Material{ .diffuse_color = Vec3.init(0, 0, 1) }),
+        @constCast(&graphics.material.Material{ .diffuse_color = Vec3.init(1, 1, 0) }),
+        @constCast(&graphics.material.Material{ .diffuse_color = Vec3.init(0, 1, 1) }),
+        //@constCast(&graphics.material.Material{ .diffuse_color = Vec3.init(1, 0, 1) }),
     };
 
     for (positions, colors) |p, c| {
@@ -61,14 +62,11 @@ pub fn main() !void {
 
     const mesh_mat = graphics.material.Material{
         .material_type = graphics.material.MaterialType.DIFFUSE_AND_GLOSSY,
-        .texture = Texture{
-            .TEXTURE_FILE = "../tests/assets/textures/texture01.png",
-            // .SOLID_COLOR = (RGB{
-            //     .r = 132,
-            //     .g = 195,
-            //     .b = 190,
-            // }).rgb_to_vec(),
-        },
+        .diffuse_color = (RGB{
+            .r = 132,
+            .g = 195,
+            .b = 190,
+        }).rgb_to_vec(),
     };
 
     try scene_objects.append(

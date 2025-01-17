@@ -13,6 +13,7 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
 
     const all_targets = b.option(bool, "all-targets", "Build for all targets") orelse false;
+    const debug = b.option(bool, "debug", "Build in debug mode") orelse false;
 
     if (all_targets) {
         for (targets) |t| {
@@ -52,7 +53,7 @@ pub fn build(b: *std.Build) !void {
             .name = "z3d",
             .root_source_file = b.path("src/main.zig"),
             .target = target,
-            .optimize = .ReleaseFast,
+            .optimize = if (!debug) .ReleaseFast else .Debug,
         });
 
         exe.linkSystemLibrary("SDL2");

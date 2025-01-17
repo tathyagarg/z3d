@@ -24,5 +24,11 @@ test "all" {
     // _ = @import("scene/physics.zig");
 
     // Windows
-    _ = @import("windows/window_init.zig");
+    // _ = @import("windows/window_init.zig");
+
+    // Images
+    _ = @import("images/png.zig");
+
+    // Engine
+    // _ = @import("engine/test01.zig");
 }

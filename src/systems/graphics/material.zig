@@ -9,11 +9,16 @@ pub const MaterialType = enum {
     REFLECTION,
 };
 
+pub const Texture = union(enum) {
+    SOLID_COLOR: Vec3f,
+    TEXTURE_FILE: []const u8, // file path
+};
+
 pub const Material = struct {
     material_type: MaterialType = .DIFFUSE_AND_GLOSSY,
     ior: float = 1.3,
     kd: float = 0.8,
     ks: float = 0.2,
-    diffuse_color: Vec3f = Vec3f.diagonal(0.2),
+    texture: Texture,
     specular_exponent: float = 25,
 };
