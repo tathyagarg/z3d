@@ -2,6 +2,14 @@ const std = @import("std");
 const png = @import("png.zig");
 const utils = @import("utils.zig");
 
+const math = @import("../../core/math/math.zig");
+const constants = @import("../../core/constants.zig");
+const Vec2 = math.Vec2;
+
+const Vec2f = Vec2(constants.FLOAT);
+
+const RGB = @import("../graphics/graphics.zig").RGB;
+
 // const ImageData = utils.ImageData;
 
 pub const FileData = union(enum) {
@@ -60,5 +68,12 @@ pub const Image = struct {
             FileData{ .BMP = 0 }
         else
             unreachable;
+    }
+
+    pub fn sample(self: Self, uv: Vec2f) RGB {
+        return switch (self.file_type) {
+            FileData.PNG => |img_data| img_data.sample(uv),
+            else => RGB{ .r = 0, .g = 0, .b = 0 },
+        };
     }
 };

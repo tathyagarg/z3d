@@ -13,6 +13,7 @@ const transform = z3d.transform;
 const EventHandler = z3d.event_handler.EventHandler;
 const RGB = graphics.RGB;
 const Texture = graphics.material.Texture;
+const Image = z3d.images.Image;
 
 const Vec3 = math.Vec3(f32);
 const Vec2 = math.Vec2(f32);
@@ -35,10 +36,10 @@ pub fn main() !void {
     };
 
     const colors = [_]*graphics.material.Material{
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(1, 0, 0) } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(0, 0, 1) } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(1, 1, 0) } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = Vec3.init(0, 1, 1) } }),
+        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 0, .b = 0 } } }),
+        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 0, .b = 255 } } }),
+        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 255, .b = 0 } } }),
+        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 255, .b = 255 } } }),
     };
 
     for (positions, colors) |p, c| {
@@ -48,33 +49,45 @@ pub fn main() !void {
         try scene_objects.append(sphere);
     }
 
-    const vertices_data: []*Vec3 = @constCast(&[_]*Vec3{
-        @constCast(&Vec3.init(9, 15, 15)),
-        @constCast(&Vec3.init(15, 15, 15)),
-        @constCast(&Vec3.init(15, 15, 9)),
-        @constCast(&Vec3.init(9, 15, 9)),
-        @constCast(&Vec3.init(9, 9, 15)),
-        @constCast(&Vec3.init(15, 9, 15)),
-        @constCast(&Vec3.init(15, 9, 9)),
-        @constCast(&Vec3.init(9, 9, 9)),
-    });
+    // const vertices_data: []*Vec3 = @constCast(&[_]*Vec3{
+    //     @constCast(&Vec3.init(9, 15, 15)),
+    //     @constCast(&Vec3.init(15, 15, 15)),
+    //     @constCast(&Vec3.init(15, 15, 9)),
+    //     @constCast(&Vec3.init(9, 15, 9)),
+    //     @constCast(&Vec3.init(9, 9, 15)),
+    //     @constCast(&Vec3.init(15, 9, 15)),
+    //     @constCast(&Vec3.init(15, 9, 9)),
+    //     @constCast(&Vec3.init(9, 9, 9)),
+    // });
 
+    var image = try Image.init("tests/assets/textures/texture01.png");
+    defer image.deinit();
     const mesh_mat = graphics.material.Material{
         .material_type = graphics.material.MaterialType.DIFFUSE_AND_GLOSSY,
         .texture = Texture{
-            .TEXTURE_FILE = "../tests/assets/textures/texture01.png",
-            // .SOLID_COLOR = (RGB{
-            //     .r = 132,
-            //     .g = 195,
-            //     .b = 190,
-            // }).rgb_to_vec(),
+            .TEXTURE_FILE = image,
         },
     };
 
+    // try scene_objects.append(
+    //     objects.Object{
+    //         .mesh_triangle = objects.Cuboid(
+    //             &vertices_data,
+    //             &mesh_mat,
+    //             null,
+    //         ),
+    //     },
+    // );
+
     try scene_objects.append(
         objects.Object{
-            .mesh_triangle = objects.Cuboid(
-                &vertices_data,
+            .rectangle = objects.Rectangle.init(
+                &@constCast(&[_]*Vec3{
+                    @constCast(&Vec3.init(9, 15, 15)),
+                    @constCast(&Vec3.init(15, 15, 15)),
+                    @constCast(&Vec3.init(15, 15, 9)),
+                    @constCast(&Vec3.init(9, 15, 9)),
+                }),
                 &mesh_mat,
                 null,
             ),
@@ -86,16 +99,16 @@ pub fn main() !void {
         .intensity = Vec3.diagonal(0.9),
     };
 
-    // const light2 = Light{
-    //     .position = Vec3.init(-7.5, -7.5, -7.5),
-    //     .intensity = Vec3.diagonal(0.9),
-    // };
+    const light2 = Light{
+        .position = Vec3.init(12, 18, 12),
+        .intensity = Vec3.diagonal(0.9),
+    };
 
     var lights = std.ArrayList(Light).init(allocator);
     defer lights.deinit();
 
     try lights.append(light);
-    // try lights.append(light2);
+    try lights.append(light2);
 
     // const cam = Camera{
     //     .position = &transform.PositionHandler{
@@ -129,6 +142,7 @@ pub fn main() !void {
                 .height = HEIGHT,
                 .fov = 90,
             },
+            .cpu_count = 4,
         },
     );
     var eng = try engine.Engine.init(

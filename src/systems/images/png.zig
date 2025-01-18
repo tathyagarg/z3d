@@ -6,6 +6,9 @@ const utils = @import("utils.zig");
 const Dimensions = utils.Dimensions;
 
 const RGB = @import("../graphics/rgb.zig").RGB;
+const Vec2 = @import("../../core/math/math.zig").Vec2;
+const float = @import("../../core/constants.zig").FLOAT;
+const Vec2f = Vec2(float);
 
 const SIGNATURE_LENGTH = 8;
 const SIGNATURE: []const u8 = &[8]u8{ 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
@@ -150,8 +153,6 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
     try get_chunk_type(file_buffer, &chunk_type);
     const chunk_data = try get_chunk_data(file_buffer, chunk_length);
 
-    std.debug.print("Chunk Type: {s}\n", .{chunk_type});
-
     if (std.mem.eql(u8, &chunk_type, "IHDR")) {
         const dims = get_dimensions(chunk_data);
         const width = dims.width;
@@ -193,10 +194,6 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
         // const mask: u8 = @intCast((@as(u256, 1) << image_data.bit_depth) - 1);
         var decoded = std.ArrayList(u8).init(std.heap.page_allocator);
         defer decoded.deinit();
-
-        std.debug.print("Scanline Length: {d}\n", .{scanline_length});
-        std.debug.print("Height: {d}\n", .{image_data.height});
-        std.debug.print("BPP: {d}\n", .{bytes_per_pixel});
 
         for (0..image_data.height) |y| {
             const filter_type = temporary.items[y * scanline_length];
@@ -260,8 +257,6 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
             else => unreachable,
         }
 
-        for (image_data.pixel_data.items) |pixel| std.debug.print("{d} {d} {d}\n", .{ pixel.r, pixel.g, pixel.b });
-
         return true;
     } else if (std.mem.eql(u8, &chunk_type, "gAMA")) {
         return true;
@@ -295,7 +290,7 @@ pub fn get_byte(filter_type: FilterType, target: u8, prev: u8, prior: u8, prev_p
         .Sub => @intCast((@as(u9, target) + @as(u9, prev)) % 256),
         .Up => @intCast((@as(u9, target) + @as(u9, prior)) % 256),
         .Average => target + @divFloor(prev + prior, 2),
-        .Paeth => target + paeth_predictor(prev, prior, prev_prior),
+        .Paeth => @intCast((@as(u9, target) + @as(u9, paeth_predictor(prev, prior, prev_prior))) % 256),
     };
 }
 
@@ -311,7 +306,7 @@ pub fn get_samples_per_pixel(color_type: ColorType) u8 {
 }
 
 pub fn paeth_predictor(a: u8, b: u8, c: u8) u8 {
-    const p = a + b - c;
+    const p = @as(i16, a) + @as(i16, b) - @as(i16, c);
     const pa = @abs(p - a);
     const pb = @abs(p - b);
     const pc = @abs(p - c);
@@ -353,5 +348,13 @@ pub const ImageData = struct {
 
     pub fn deinit(self: *Self) void {
         self.pixel_data.deinit();
+    }
+
+    pub fn sample(self: Self, uv: Vec2f) RGB {
+        const x: usize = @intFromFloat(uv.x * (@as(float, @floatFromInt(self.width)) - 1));
+        const y: usize = @intFromFloat(uv.y * (@as(float, @floatFromInt(self.height)) - 1));
+
+        const pixel = self.pixel_data.items[y * self.width + x];
+        return pixel;
     }
 };

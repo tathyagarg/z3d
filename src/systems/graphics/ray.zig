@@ -168,6 +168,7 @@ pub const Ray = struct {
         return switch (obj) {
             .sphere => |s| s.intersects(self, t_near_k),
             .mesh_triangle => |m| m.intersects(self, t_near_k, index_k, uv_k),
+            .rectangle => |r| r.intersects(self, t_near_k, uv_k),
         };
     }
 };

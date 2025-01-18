@@ -106,25 +106,29 @@ pub const Scene = struct {
     }
 
     pub fn render(self: Self, frame_buffer: *[]RGB) !void {
-        var handles: std.ArrayList(std.Thread) = std.ArrayList(std.Thread).init(allocator);
-        defer handles.deinit();
+        if (self.cpu_count != 1) {
+            var handles: std.ArrayList(std.Thread) = std.ArrayList(std.Thread).init(allocator);
+            defer handles.deinit();
 
-        const lines_per_thread = @divFloor(self.ray_casting_options.height, self.cpu_count);
+            const lines_per_thread = @divFloor(self.ray_casting_options.height, self.cpu_count);
 
-        for (0..self.cpu_count) |i| {
-            try handles.append(try std.Thread.spawn(.{}, Scene.render_task, .{
-                self,
-                frame_buffer,
-                RenderingOption{
-                    .x_start = 0,
-                    .y_start = i * lines_per_thread,
-                    .x_end = self.ray_casting_options.width,
-                    .y_end = (i + 1) * lines_per_thread,
-                },
-            }));
+            for (0..self.cpu_count) |i| {
+                try handles.append(try std.Thread.spawn(.{}, Scene.render_task, .{
+                    self,
+                    frame_buffer,
+                    RenderingOption{
+                        .x_start = 0,
+                        .y_start = i * lines_per_thread,
+                        .x_end = self.ray_casting_options.width,
+                        .y_end = (i + 1) * lines_per_thread,
+                    },
+                }));
+            }
+
+            for (handles.items) |h|
+                h.join();
+        } else {
+            self.render_task(frame_buffer, RenderingOption{});
         }
-
-        for (handles.items) |h|
-            h.join();
     }
 };

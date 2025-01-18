@@ -147,15 +147,15 @@ pub const MeshTriangle = struct {
     pub fn eval_diffuse_color(self: Self, texture: Vec2f) Vec3f {
         // The diffuse color is a pattern, independent of `self` and it's properties. Thus, we're free to discard it here.
         return switch (self.material.texture) {
-            .SOLID_COLOR => |color| color.mix(
+            .SOLID_COLOR => |color| color.rgb_to_vec().mix(
                 (RGB{ .r = 0, .g = 0, .b = 0 }).rgb_to_vec(),
                 texture.x - texture.y,
             ),
-            .TEXTURE_FILE => unreachable,
+            .TEXTURE_FILE => |image| image.sample(texture).rgb_to_vec(),
         };
     }
 
-    pub inline fn get_surface_props(
+    pub fn get_surface_props(
         self: Self,
         index: usize,
         uv: *Vec2f,
