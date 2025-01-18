@@ -33,6 +33,14 @@ pub const ColorType = enum(u8) {
     TrueColorAlpha = CT_COLOR_USED | CT_ALPHA_USED,
 };
 
+pub const FilterType = enum(u8) {
+    None = 0,
+    Sub = 1,
+    Up = 2,
+    Average = 3,
+    Paeth = 4,
+};
+
 pub fn get_total_chunk_length(data: usize) i64 {
     return @as(i64, @intCast(CHUNK_LENGTH_HEADER_LENGTH + CHUNK_TYPE_HEADER_LENGTH + data + CHUNK_CRC_HEADER_LENGTH));
 }
@@ -110,19 +118,16 @@ pub fn check_gama_presence(file_buffer: File) !bool {
     return true;
 }
 
-pub fn get_palette_data(chunk_length: usize, chunk_data: []const u8) ![]RGB {
+pub fn get_palette_data(chunk_length: usize, chunk_data: []const u8, palette_data: *[]RGB) !void {
     const palette_length = @divExact(chunk_length, 3);
 
-    var palette_data: [PLTE_MAX_ENTRIES]RGB = undefined;
     for (0..palette_length - 1) |i| {
-        palette_data[i] = RGB{
+        palette_data.*[i] = RGB{
             .r = chunk_data[i * 3 + 0],
             .g = chunk_data[i * 3 + 1],
             .b = chunk_data[i * 3 + 2],
         };
     }
-
-    return palette_data[0..palette_length];
 }
 
 pub fn get_chunk_type(file_buffer: File, buffer: *[CHUNK_TYPE_HEADER_LENGTH]u8) !void {
@@ -156,11 +161,12 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
         image_data.width = width;
         image_data.height = height;
         image_data.color_type = color_type;
+        image_data.bit_depth = chunk_data[8];
 
         return true;
     } else if (std.mem.eql(u8, &chunk_type, "PLTE")) {
-        const palette = try get_palette_data(chunk_length, chunk_data);
-
+        var palette = try std.heap.page_allocator.alloc(RGB, PLTE_MAX_ENTRIES);
+        try get_palette_data(chunk_length, chunk_data, &palette);
         image_data.palette = palette;
 
         return true;
@@ -171,13 +177,90 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
 
         try std.compress.zlib.decompress(reader.reader(), &temporary.writer());
 
-        const useless_bits = image_data.bit_depth * image_data.width % 8;
+        // const samples_per_byte = @divExact(8, image_data.bit_depth);
+        var samples_per_scanline = image_data.width;
+        const sample_per_pixel = get_samples_per_pixel(image_data.color_type);
+
+        samples_per_scanline *= sample_per_pixel;
+        const bytes_per_pixel =
+            @divFloor(image_data.bit_depth * sample_per_pixel, 8) +
+            @intFromBool(image_data.bit_depth * sample_per_pixel % 8 != 0);
+
+        const scanline_length =
+            1 + image_data.width * bytes_per_pixel +
+            @intFromBool(image_data.width * image_data.bit_depth % 8 != 0);
+
+        // const mask: u8 = @intCast((@as(u256, 1) << image_data.bit_depth) - 1);
+        var decoded = std.ArrayList(u8).init(std.heap.page_allocator);
+        defer decoded.deinit();
+
+        std.debug.print("Scanline Length: {d}\n", .{scanline_length});
+        std.debug.print("Height: {d}\n", .{image_data.height});
+        std.debug.print("BPP: {d}\n", .{bytes_per_pixel});
+
         for (0..image_data.height) |y| {
-            const byte_count = @divFloor(image_data.width * image_data.bit_depth, 8) + (useless_bits != 0);
-            for (temporary.items[y * image_data.width + 1 .. (y + 1) * image_data.width]) |x| {
-                // TODO: Implement this
+            const filter_type = temporary.items[y * scanline_length];
+            for (1..scanline_length) |x| {
+                const prev = if (x <= bytes_per_pixel) 0 else decoded.items[y * scanline_length + x - bytes_per_pixel - 1 - y];
+                const prior = if (y == 0) 0 else decoded.items[(y - 1) * scanline_length + x - y];
+                const prev_prior = if (x <= bytes_per_pixel or y == 0) 0 else decoded.items[(y - 1) * scanline_length + x - bytes_per_pixel - 1];
+
+                const target = temporary.items[y * scanline_length + x];
+                const byte = get_byte(@enumFromInt(filter_type), target, prev, prior, prev_prior);
+                try decoded.append(byte);
             }
         }
+
+        if (image_data.bit_depth != 8) {
+            std.debug.print("Unsupported bit depth: {d}\n", .{image_data.bit_depth});
+            return error.UnsupportedBitDepth;
+        }
+
+        switch (image_data.color_type) {
+            .GrayScale => for (decoded.items) |byte|
+                try image_data.pixel_data.append(RGB{ .r = byte, .g = byte, .b = byte }),
+
+            .TrueColor => {
+                for (0..@divExact(decoded.items.len, 3)) |i| {
+                    const r = decoded.items[i * 3 + 0];
+                    const g = decoded.items[i * 3 + 1];
+                    const b = decoded.items[i * 3 + 2];
+
+                    try image_data.pixel_data.append(RGB{ .r = r, .g = g, .b = b });
+                }
+            },
+
+            .IndexedColor => {
+                for (decoded.items) |byte| {
+                    const color = image_data.palette.?[byte];
+                    try image_data.pixel_data.append(color);
+                }
+            },
+
+            .GrayScaleAlpha => {
+                for (0..@divExact(decoded.items.len, 2)) |i| {
+                    const gray = decoded.items[i * 2 + 0];
+                    // Ingore alpha channel
+
+                    try image_data.pixel_data.append(RGB{ .r = gray, .g = gray, .b = gray });
+                }
+            },
+
+            .TrueColorAlpha => {
+                for (0..@divExact(decoded.items.len, 4)) |i| {
+                    const r = decoded.items[i * 4 + 0];
+                    const g = decoded.items[i * 4 + 1];
+                    const b = decoded.items[i * 4 + 2];
+                    // Ingore alpha channel
+
+                    try image_data.pixel_data.append(RGB{ .r = r, .g = g, .b = b });
+                }
+            },
+
+            else => unreachable,
+        }
+
+        for (image_data.pixel_data.items) |pixel| std.debug.print("{d} {d} {d}\n", .{ pixel.r, pixel.g, pixel.b });
 
         return true;
     } else if (std.mem.eql(u8, &chunk_type, "gAMA")) {
@@ -194,6 +277,51 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
     }
 
     return false;
+}
+
+/// Decodes the byte from the given filter type, with the format:
+/// +---+---+
+/// | A | B |
+/// +---+---+
+/// | C | X |
+/// +---+---+
+/// A = prev_prior
+/// B = prior
+/// C = prev
+/// X = target
+pub fn get_byte(filter_type: FilterType, target: u8, prev: u8, prior: u8, prev_prior: u8) u8 {
+    return switch (filter_type) {
+        .None => target,
+        .Sub => @intCast((@as(u9, target) + @as(u9, prev)) % 256),
+        .Up => @intCast((@as(u9, target) + @as(u9, prior)) % 256),
+        .Average => target + @divFloor(prev + prior, 2),
+        .Paeth => target + paeth_predictor(prev, prior, prev_prior),
+    };
+}
+
+pub fn get_samples_per_pixel(color_type: ColorType) u8 {
+    return switch (color_type) {
+        ColorType.GrayScale => 1,
+        ColorType.TrueColor => 3,
+        ColorType.IndexedColor => 1,
+        ColorType.GrayScaleAlpha => 2,
+        ColorType.TrueColorAlpha => 4,
+        else => unreachable,
+    };
+}
+
+pub fn paeth_predictor(a: u8, b: u8, c: u8) u8 {
+    const p = a + b - c;
+    const pa = @abs(p - a);
+    const pb = @abs(p - b);
+    const pc = @abs(p - c);
+
+    return if (pa <= pb and pa <= pc)
+        a
+    else if (pb <= pc)
+        b
+    else
+        c;
 }
 
 pub fn get_image_data(file_buffer: File) !ImageData {

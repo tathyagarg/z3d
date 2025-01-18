@@ -5,6 +5,6 @@ const _images = z3d.images;
 const Image = _images.Image;
 
 test "png" {
-    var image = try Image.init("tests/assets/textures/texture03.png");
+    var image = try Image.init("tests/assets/textures/texture01.png");
     defer image.deinit();
 }
