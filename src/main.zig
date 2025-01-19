@@ -26,75 +26,54 @@ pub fn main() !void {
     var scene_objects = std.ArrayList(objects.Object).init(allocator);
     defer scene_objects.deinit();
 
-    const positions = [_]*Vec3{
-        @constCast(&Vec3.init(-3, 0, 0)),
-        //@constCast(&Vec3.init(0, -3, 0)),
-        @constCast(&Vec3.init(0, 0, -3)),
-        @constCast(&Vec3.init(3, 0, 0)),
-        @constCast(&Vec3.init(0, 0, 3)),
-        //@constCast(&Vec3.init(0, 3, 0)),
+    const positions = [_]Vec3{
+        Vec3.init(-3, 0, 0),
+        Vec3.init(0, 0, -3),
+        Vec3.init(3, 0, 0),
+        Vec3.init(0, 0, 3),
     };
 
-    const colors = [_]*graphics.material.Material{
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 0, .b = 0 } } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 0, .b = 255 } } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 255, .b = 0 } } }),
-        @constCast(&graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 255, .b = 255 } } }),
+    const colors = [_]graphics.material.Material{
+        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 0, .b = 0 } } },
+        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 0, .b = 255 } } },
+        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 255, .b = 0 } } },
+        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 255, .b = 255 } } },
     };
 
-    for (positions, colors) |p, c| {
+    for (0..positions.len) |i| {
         const sphere = objects.Object{
-            .sphere = objects.Sphere.init(p, 1, c),
+            .sphere = objects.Sphere.init(@constCast(&positions[i]), 1, &colors[i]),
         };
         try scene_objects.append(sphere);
     }
 
-    // const vertices_data: []*Vec3 = @constCast(&[_]*Vec3{
-    //     @constCast(&Vec3.init(9, 15, 15)),
-    //     @constCast(&Vec3.init(15, 15, 15)),
-    //     @constCast(&Vec3.init(15, 15, 9)),
-    //     @constCast(&Vec3.init(9, 15, 9)),
-    //     @constCast(&Vec3.init(9, 9, 15)),
-    //     @constCast(&Vec3.init(15, 9, 15)),
-    //     @constCast(&Vec3.init(15, 9, 9)),
-    //     @constCast(&Vec3.init(9, 9, 9)),
-    // });
+    const vertices_data: [8]Vec3 = [8]Vec3{
+        Vec3.init(9, 15, 15),
+        Vec3.init(15, 15, 15),
+        Vec3.init(15, 15, 9),
+        Vec3.init(9, 15, 9),
+        Vec3.init(9, 9, 15),
+        Vec3.init(15, 9, 15),
+        Vec3.init(15, 9, 9),
+        Vec3.init(9, 9, 9),
+    };
 
     var image = try Image.init("tests/assets/textures/texture01.png");
     defer image.deinit();
     const mesh_mat = graphics.material.Material{
-        .material_type = graphics.material.MaterialType.DIFFUSE_AND_GLOSSY,
+        .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image,
         },
     };
 
-    // try scene_objects.append(
-    //     objects.Object{
-    //         .mesh_triangle = objects.Cuboid(
-    //             &vertices_data,
-    //             &mesh_mat,
-    //             null,
-    //         ),
-    //     },
-    // );
-
-    try scene_objects.append(
-        objects.Object{
-            .rectangle = objects.Rectangle.init(
-                [_]Vec3{
-                    Vec3.init(9, 15, 15),
-                    Vec3.init(15, 15, 15),
-                    Vec3.init(15, 15, 9),
-                    Vec3.init(9, 15, 9),
-                },
-                &mesh_mat,
-                null,
-                true,
-                //   false,
-            ),
-        },
-    );
+    for (objects.Cuboid(vertices_data, &mesh_mat, null, true)) |rectangle| {
+        try scene_objects.append(
+            objects.Object{
+                .rectangle = @constCast(&rectangle).rotate_counterclockwise(1).*,
+            },
+        );
+    }
 
     const light = Light{
         .position = Vec3.init(0, 0, 0),
@@ -102,8 +81,8 @@ pub fn main() !void {
     };
 
     const light2 = Light{
-        .position = Vec3.init(12, 18, 12),
-        .intensity = Vec3.diagonal(0.9),
+        .position = Vec3.init(18, 18, 18),
+        .intensity = Vec3.diagonal(1),
     };
 
     var lights = std.ArrayList(Light).init(allocator);

@@ -148,4 +148,104 @@ pub const Rectangle = struct {
             point.z >= min_z and
             point.z <= max_z;
     }
+
+    pub fn rotate_clockwise(self: *Rectangle, turns: u2) *Rectangle {
+        for (0..turns) |_| {
+            self.textures = [4]Vec2f{
+                self.textures[1],
+                self.textures[2],
+                self.textures[3],
+                self.textures[0],
+            };
+        }
+        return self;
+    }
+
+    pub fn rotate_counterclockwise(self: *Rectangle, turns: u2) *Rectangle {
+        for (0..turns) |_| {
+            self.textures = [4]Vec2f{
+                self.textures[3],
+                self.textures[0],
+                self.textures[1],
+                self.textures[2],
+            };
+        }
+        return self;
+    }
 };
+
+pub fn Cuboid(
+    vertices: [8]Vec3f,
+    material: *const Material,
+    physics_engine: ?*physics.PhysicsEngine,
+    inverted: bool,
+) [6]Rectangle {
+    return [6]Rectangle{
+        Rectangle.init(
+            [4]Vec3f{
+                vertices[0],
+                vertices[1],
+                vertices[2],
+                vertices[3],
+            },
+            material,
+            physics_engine,
+            !inverted,
+        ),
+        Rectangle.init(
+            [4]Vec3f{
+                vertices[4],
+                vertices[5],
+                vertices[6],
+                vertices[7],
+            },
+            material,
+            physics_engine,
+            inverted,
+        ),
+        Rectangle.init(
+            [4]Vec3f{
+                vertices[0],
+                vertices[1],
+                vertices[5],
+                vertices[4],
+            },
+            material,
+            physics_engine,
+            inverted,
+        ),
+        Rectangle.init(
+            [4]Vec3f{
+                vertices[1],
+                vertices[2],
+                vertices[6],
+                vertices[5],
+            },
+            material,
+            physics_engine,
+            inverted,
+        ),
+        Rectangle.init(
+            [4]Vec3f{
+                vertices[2],
+                vertices[3],
+                vertices[7],
+                vertices[6],
+            },
+            material,
+            physics_engine,
+            inverted,
+        ),
+        Rectangle.init(
+            [4]Vec3f{
+                vertices[3],
+                vertices[0],
+                vertices[4],
+                vertices[7],
+            },
+            material,
+            physics_engine,
+            inverted,
+        ),
+    };
+}

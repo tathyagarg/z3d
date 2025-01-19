@@ -182,7 +182,7 @@ pub const MeshTriangle = struct {
 };
 
 pub fn Cuboid(
-    vertices: *const []*Vec3f,
+    vertices: *const []Vec3f,
     material: *const Material,
     physics_engine: ?*physics.PhysicsEngine,
 ) MeshTriangle {

@@ -1,7 +1,8 @@
 pub const Sphere = @import("sphere.zig").Sphere;
 pub const MeshTriangle = @import("mesh_triangle.zig").MeshTriangle;
 pub const Rectangle = @import("rectangle.zig").Rectangle;
-pub const Cuboid = @import("mesh_triangle.zig").Cuboid;
+pub const MeshCuboid = @import("mesh_triangle.zig").Cuboid;
+pub const Cuboid = @import("rectangle.zig").Cuboid;
 
 const math = @import("../../../core/math/math.zig");
 const float = @import("../../../core/constants.zig").FLOAT;
