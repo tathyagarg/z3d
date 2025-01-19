@@ -67,10 +67,20 @@ pub fn main() !void {
         },
     };
 
-    for (objects.Cuboid(vertices_data, &mesh_mat, null, true)) |rectangle| {
+    const materials = [6]*const graphics.material.Material{
+        &mesh_mat,
+        &mesh_mat,
+        &mesh_mat,
+        &mesh_mat,
+        &mesh_mat,
+        &mesh_mat,
+    };
+
+    for (0.., objects.Cuboid(vertices_data, materials, null, true)) |i, rectangle| {
+        const rect = @constCast(&rectangle).rotate_clockwise(@as(u2, @intCast(i % 2)));
         try scene_objects.append(
             objects.Object{
-                .rectangle = @constCast(&rectangle).rotate_counterclockwise(1).*,
+                .rectangle = rect.*,
             },
         );
     }

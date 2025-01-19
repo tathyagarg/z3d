@@ -62,6 +62,7 @@ pub const Engine = struct {
         flags: WindowFlags,
         scene: Scene,
     ) !Engine {
+        _ = .{ x, y };
         if (sdl.SDL_Init(sdl.SDL_INIT_EVERYTHING) != 0) {
             std.debug.print("{any}\n", .{sdl.SDL_GetError()});
             return error.EngineInitializationFailed;
@@ -69,8 +70,8 @@ pub const Engine = struct {
 
         const window = sdl.SDL_CreateWindow(
             title,
-            x,
-            y,
+            sdl.SDL_WINDOWPOS_CENTERED,
+            sdl.SDL_WINDOWPOS_CENTERED,
             width,
             height,
             flags.as_int(),

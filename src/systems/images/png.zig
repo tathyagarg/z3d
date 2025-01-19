@@ -198,9 +198,9 @@ pub fn parse_chunk(file_buffer: File, image_data: *ImageData) !bool {
         for (0..image_data.height) |y| {
             const filter_type = temporary.items[y * scanline_length];
             for (1..scanline_length) |x| {
-                const prev = if (x <= bytes_per_pixel) 0 else decoded.items[y * scanline_length + x - bytes_per_pixel - 1 - y];
+                const prev = if (x <= bytes_per_pixel) 0 else decoded.items[y * (scanline_length - 1) + x - bytes_per_pixel - 1];
                 const prior = if (y == 0) 0 else decoded.items[(y - 1) * scanline_length + x - y];
-                const prev_prior = if (x <= bytes_per_pixel or y == 0) 0 else decoded.items[(y - 1) * scanline_length + x - bytes_per_pixel - 1];
+                const prev_prior = if (x <= bytes_per_pixel or y == 0) 0 else decoded.items[(y - 1) * (scanline_length - 1) + x - bytes_per_pixel - 1];
 
                 const target = temporary.items[y * scanline_length + x];
                 const byte = get_byte(@enumFromInt(filter_type), target, prev, prior, prev_prior);
