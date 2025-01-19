@@ -31,7 +31,7 @@ pub const MeshTriangle = struct {
     const Self = @This();
 
     pub fn init(
-        vertices: *const []*Vec3f,
+        vertices: *const []Vec3f,
         vertex_count: usize,
         vertex_indices: []const usize,
         num_triangles: u32,
@@ -123,9 +123,9 @@ pub const MeshTriangle = struct {
 
         var intersect: bool = false;
         for (0..self.num_triangles) |k| {
-            const v0: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 0]].*;
-            const v1: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 1]].*;
-            const v2: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 2]].*;
+            const v0: Vec3f = self.position.multi.points.*[self.vertex_indices[k * 3 + 0]];
+            const v1: Vec3f = self.position.multi.points.*[self.vertex_indices[k * 3 + 1]];
+            const v2: Vec3f = self.position.multi.points.*[self.vertex_indices[k * 3 + 2]];
 
             var t: float = undefined;
             var u: float = undefined;
@@ -162,12 +162,12 @@ pub const MeshTriangle = struct {
         normal: *Vec3f,
         st: *Vec2f,
     ) void {
-        const v0: *Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 0]];
-        const v1: *Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 1]];
-        const v2: *Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 2]];
+        const v0: Vec3f = self.position.multi.points.*[self.vertex_indices[index * 3 + 0]];
+        const v1: Vec3f = self.position.multi.points.*[self.vertex_indices[index * 3 + 1]];
+        const v2: Vec3f = self.position.multi.points.*[self.vertex_indices[index * 3 + 2]];
 
-        const e0: Vec3f = v1.subtract(v0.*).normalize();
-        const e1: Vec3f = v2.subtract(v1.*).normalize();
+        const e0: Vec3f = v1.subtract(v0).normalize();
+        const e1: Vec3f = v2.subtract(v1).normalize();
 
         normal.* = e0.cross(e1).normalize();
 

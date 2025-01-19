@@ -20,7 +20,7 @@ const ArrayList = @import("std").ArrayList;
 const RGB = @import("../graphics.zig").RGB;
 
 pub const Rectangle = struct {
-    vertices: []*Vec3f,
+    vertices: [4]Vec3f,
 
     position: position.PositionHandler,
     material: *const Material,
@@ -32,34 +32,38 @@ pub const Rectangle = struct {
         Vec2f.init(1, 1),
         Vec2f.init(0, 1),
     },
+    is_double_sided: bool = false,
 
     normal: Vec3f = undefined,
 
     pub fn init(
-        vertices: *const []*Vec3f,
+        vertices: [4]Vec3f,
         material: *const Material,
         physics_engine: ?*physics.PhysicsEngine,
+        inverted: bool,
     ) Rectangle {
         var rect = Rectangle{
-            .vertices = vertices.*,
+            .vertices = vertices,
             .position = position.PositionHandler{
                 .multi = position.MultiPointHandler{
-                    .points = vertices.*,
+                    .points = @ptrCast(&vertices),
                     .point_count = 4,
                 },
             },
             .material = material,
             .physics = physics_engine,
         };
-        rect.compute_normal();
+        rect.compute_normal(inverted);
 
         return rect;
     }
 
-    pub fn compute_normal(self: *Rectangle) void {
-        self.normal = self.vertices[1].subtract(self.vertices[0].*).cross(
-            self.vertices[2].subtract(self.vertices[0].*),
-        ).normalize();
+    pub fn compute_normal(self: *Rectangle, inverted: bool) void {
+        self.normal = self.vertices[1]
+            .subtract(self.vertices[0])
+            .cross(self.vertices[2].subtract(self.vertices[0]))
+            .normalize()
+            .multiply(if (inverted) -1 else 1);
     }
 
     pub fn get_surface_props(
@@ -98,22 +102,29 @@ pub const Rectangle = struct {
         // tn.* = t;
 
         // return self.is_inside(intersection_point);
-        const edge1 = self.vertices[1].subtract(self.vertices[0].*);
-        const edge2 = self.vertices[3].subtract(self.vertices[0].*);
+        const edge1 = self.vertices[1].subtract(self.vertices[0]);
+        const edge2 = self.vertices[3].subtract(self.vertices[0]);
 
         const denom = ray.direction.dot(self.normal);
         if (@abs(denom) < 1e-6) return false;
 
-        const t = self.vertices[0].subtract(ray.origin).dot(self.normal) / denom;
+        const t = self.vertices[0]
+            .subtract(ray.origin)
+            .dot(self.normal) / denom;
         if (t < 0) return false;
 
         const intersection_point = ray.at(t);
 
-        const local_u = intersection_point.subtract(self.vertices[0].*).dot(edge1) / edge1.dot(edge1);
-        const local_v = intersection_point.subtract(self.vertices[0].*).dot(edge2) / edge2.dot(edge2);
+        const local_u = intersection_point
+            .subtract(self.vertices[0])
+            .dot(edge1) / edge1.dot(edge1);
+        const local_v = intersection_point
+            .subtract(self.vertices[0])
+            .dot(edge2) / edge2.dot(edge2);
 
         if (local_u < 0 or local_u > 1 or local_v < 0 or local_v > 1) return false;
 
+        // std.debug.print("yes\n", .{});
         tn.* = t;
         uv_k.x = local_u;
         uv_k.y = local_v;

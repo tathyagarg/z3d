@@ -82,14 +82,16 @@ pub fn main() !void {
     try scene_objects.append(
         objects.Object{
             .rectangle = objects.Rectangle.init(
-                &@constCast(&[_]*Vec3{
-                    @constCast(&Vec3.init(9, 15, 15)),
-                    @constCast(&Vec3.init(15, 15, 15)),
-                    @constCast(&Vec3.init(15, 15, 9)),
-                    @constCast(&Vec3.init(9, 15, 9)),
-                }),
+                [_]Vec3{
+                    Vec3.init(9, 15, 15),
+                    Vec3.init(15, 15, 15),
+                    Vec3.init(15, 15, 9),
+                    Vec3.init(9, 15, 9),
+                },
                 &mesh_mat,
                 null,
+                true,
+                //   false,
             ),
         },
     );
