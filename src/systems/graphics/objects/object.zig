@@ -1,3 +1,4 @@
+const std = @import("std");
 pub const Sphere = @import("sphere.zig").Sphere;
 pub const MeshTriangle = @import("mesh_triangle.zig").MeshTriangle;
 pub const Rectangle = @import("rectangle.zig").Rectangle;
@@ -9,6 +10,7 @@ pub const PerFace = @import("rectangle.zig").PerFace;
 const math = @import("../../../core/math/math.zig");
 const float = @import("../../../core/constants.zig").FLOAT;
 const physics = @import("../../physics/physics.zig");
+const PositionHandler = @import("../../transform.zig").PositionHandler;
 
 const Vec3 = math.Vec3;
 const Vec2 = math.Vec2;
@@ -19,6 +21,12 @@ const Vec2f = math.Vec2(float);
 const ArrayList = @import("std").ArrayList;
 
 const mat = @import("../material.zig");
+
+pub var id_counter: usize = 0;
+
+pub fn assigned() void {
+    id_counter += 1;
+}
 
 pub const Object = union(enum) {
     sphere: Sphere,
@@ -42,6 +50,27 @@ pub const Object = union(enum) {
         }
     }
 
+    pub fn assign_id(self: *Self) void {
+        switch (self.*) {
+            .sphere => |*s| s.id = id_counter,
+            .mesh_triangle => |*m| m.id = id_counter,
+            .rectangle => |*r| r.id = id_counter,
+        }
+
+        id_counter += 1;
+    }
+
+    pub fn get_id(self: Self) usize {
+        // std.debug.print("Iam: {any}", .{self.});
+        return switch (self) {
+            .sphere => |s| s.id.?,
+            .mesh_triangle => |m| m.id.?,
+            .rectangle => |r| {
+                return r.id.?;
+            },
+        };
+    }
+
     pub fn get_material(self: Self) *const mat.Material {
         return switch (self) {
             .sphere => |s| s.material,
@@ -61,6 +90,14 @@ pub const Object = union(enum) {
         };
     }
 
+    pub fn get_position_handler(self: Self) PositionHandler {
+        return switch (self) {
+            .sphere => |sphere| sphere.position,
+            .mesh_triangle => |mesh| mesh.position,
+            .rectangle => |rect| rect.position,
+        };
+    }
+
     pub fn get_physics_engine(self: Self) ?*physics.PhysicsEngine {
         return switch (self) {
             .sphere => |s| s.physics,
@@ -75,5 +112,12 @@ pub const Object = union(enum) {
             .mesh_triangle => self.mesh_triangle.physics = phy,
             .rectangle => self.rectangle.physics = phy,
         }
+    }
+
+    pub fn intersects(self: Self, other: Object) bool {
+        return switch (self) {
+            .sphere => |s| s.object_intersects(other),
+            else => unreachable, // TODO:
+        };
     }
 };

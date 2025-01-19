@@ -13,7 +13,7 @@ pub const SinglePointHandler = struct {
 };
 
 pub const MultiPointHandler = struct {
-    points: *const []Vec3f,
+    points: [*]Vec3f,
     point_count: usize,
     is_static: bool = false,
 
@@ -23,7 +23,7 @@ pub const MultiPointHandler = struct {
         var minimum = Vec3f.infinity();
         var maximum = Vec3f.infinity().negate();
 
-        for (self.points.*) |p| {
+        for (0..self.point_count, self.points) |_, p| {
             minimum.x = @min(p.x, minimum.x);
             minimum.y = @min(p.y, minimum.y);
             minimum.z = @min(p.z, minimum.z);
@@ -46,9 +46,11 @@ pub const PositionHandler = union(enum) {
     pub fn translate(self: *const Self, dxyz: Vec3f) void {
         switch (self.*) {
             .single => |s| s.point.* = s.point.add(dxyz),
-            .multi => |m| for (0.., m.points.*) |i, p| {
-                m.points.*[i] = p.add(dxyz);
-            },
+            .multi => |m| {
+                for (0..m.point_count, m.points) |i, p| {
+                    m.points[i] = p.add(dxyz);
+                }
+            }
         }
     }
 

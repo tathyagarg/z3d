@@ -42,11 +42,20 @@ pub fn main() !void {
     };
 
     for (0..positions.len) |i| {
-        const sphere = objects.Object{
+        var sphere = objects.Object{
             .sphere = objects.Sphere.init(@constCast(&positions[i]), 1, &colors[i]),
         };
+        sphere.assign_id();
         try scene_objects.append(sphere);
     }
+
+    var physics_eng = physics.PhysicsEngine.init(
+        scene_objects.items[0],
+        .{},
+    );
+    physics_eng.apply_gravity(null);
+
+    scene_objects.items[0].add_physics(&physics_eng);
 
     const vertices_data: [8]Vec3 = [8]Vec3{
         Vec3.init(9, 15, 15),
@@ -77,42 +86,42 @@ pub fn main() !void {
     var image6 = try Image.init("tests/assets/textures/texture06.png");
     defer image6.deinit();
 
-    const left_mesh_mat = graphics.material.Material{
+    const left_mesh_mat = Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image,
         },
     };
 
-    const right_mesh_mat = graphics.material.Material{
+    const right_mesh_mat = Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image2,
         },
     };
 
-    const front_mesh_mat = graphics.material.Material{
+    const front_mesh_mat = Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image3,
         },
     };
 
-    const back_mesh_mat = graphics.material.Material{
+    const back_mesh_mat = Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image4,
         },
     };
 
-    const top_mesh_mat = graphics.material.Material{
+    const top_mesh_mat = Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image5,
         },
     };
 
-    const bottom_mesh_mat = graphics.material.Material{
+    const bottom_mesh_mat = Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image6,
@@ -132,12 +141,28 @@ pub fn main() !void {
 
     for (0.., objects.Cuboid(vertices_data, materials, null, true)) |i, rectangle| {
         const rect = @constCast(&rectangle).rotate_clockwise(@as(u2, @intCast(i % 2)));
-        try scene_objects.append(
-            objects.Object{
-                .rectangle = rect.*,
-            },
-        );
+        var rect_obj = objects.Object{ .rectangle = rect.* };
+        rect_obj.rectangle.id = objects.id_counter;
+        objects.assigned();
+        try scene_objects.append(rect_obj);
     }
+
+    var rect = objects.Object{
+        .rectangle = objects.Rectangle.init(
+            [4]Vec3{
+                Vec3.init(-6, -6, -6),
+                Vec3.init(-6, -6, 6),
+                Vec3.init(6, -6, 6),
+                Vec3.init(6, -6, -6),
+            },
+            &left_mesh_mat,
+            null,
+            false,
+        ),
+    };
+    rect.rectangle.id = objects.id_counter;
+    objects.assigned();
+    try scene_objects.append(rect);
 
     const light = Light{
         .position = Vec3.init(0, 0, 0),

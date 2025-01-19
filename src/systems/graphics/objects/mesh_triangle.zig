@@ -20,6 +20,8 @@ const ArrayList = @import("std").ArrayList;
 const RGB = @import("../graphics.zig").RGB;
 
 pub const MeshTriangle = struct {
+    id: ?usize = null,
+
     position: position.PositionHandler,
     vertex_indices: []const usize,
     num_triangles: u32,
@@ -123,9 +125,9 @@ pub const MeshTriangle = struct {
 
         var intersect: bool = false;
         for (0..self.num_triangles) |k| {
-            const v0: Vec3f = self.position.multi.points.*[self.vertex_indices[k * 3 + 0]];
-            const v1: Vec3f = self.position.multi.points.*[self.vertex_indices[k * 3 + 1]];
-            const v2: Vec3f = self.position.multi.points.*[self.vertex_indices[k * 3 + 2]];
+            const v0: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 0]];
+            const v1: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 1]];
+            const v2: Vec3f = self.position.multi.points[self.vertex_indices[k * 3 + 2]];
 
             var t: float = undefined;
             var u: float = undefined;
@@ -162,9 +164,9 @@ pub const MeshTriangle = struct {
         normal: *Vec3f,
         st: *Vec2f,
     ) void {
-        const v0: Vec3f = self.position.multi.points.*[self.vertex_indices[index * 3 + 0]];
-        const v1: Vec3f = self.position.multi.points.*[self.vertex_indices[index * 3 + 1]];
-        const v2: Vec3f = self.position.multi.points.*[self.vertex_indices[index * 3 + 2]];
+        const v0: Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 0]];
+        const v1: Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 1]];
+        const v2: Vec3f = self.position.multi.points[self.vertex_indices[index * 3 + 2]];
 
         const e0: Vec3f = v1.subtract(v0).normalize();
         const e1: Vec3f = v2.subtract(v1).normalize();

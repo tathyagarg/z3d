@@ -1,3 +1,4 @@
+const std = @import("std");
 const math = @import("../../../core/math/math.zig");
 const float = @import("../../../core/constants.zig").FLOAT;
 const physics = @import("../../physics/physics.zig");
@@ -13,9 +14,13 @@ const Ray = @import("../ray.zig").Ray;
 const ArrayList = @import("std").ArrayList;
 const Material = @import("../material.zig").Material;
 
+const Object = @import("object.zig").Object;
+
 const solve_quadratic = math.solve_quadratic;
 
 pub const Sphere = struct {
+    id: ?usize = null,
+
     position: position.PositionHandler,
     radius: float,
     radius_sqr: float = undefined,
@@ -76,4 +81,59 @@ pub const Sphere = struct {
     ) void {
         normal.* = (P.subtract(self.position.single.point.*)).normalize();
     }
+
+    pub fn object_intersects(self: Self, other: Object) bool {
+        return switch (other) {
+            .sphere => |s| {
+                const other_center = s.position.single.point;
+                const self_center = self.position.single.point;
+                const distance = self_center.distance(other_center.*);
+
+                return distance < (self.radius + s.radius);
+            },
+            .rectangle => |r| {
+                const min = r.position.multi.bounding_box().minimum;
+                const max = r.position.multi.bounding_box().maximum;
+
+                const center = self.position.single.point;
+
+                if (center.x + self.radius < min.x or center.x - self.radius > max.x) return false;
+                if (center.y + self.radius < min.y or center.y - self.radius > max.y) return false;
+                if (center.z + self.radius < min.z or center.z - self.radius > max.z) return false;
+
+                const closest = Vec3f.init(
+                    std.math.clamp(center.x, min.x, max.x),
+                    std.math.clamp(center.y, min.y, max.y),
+                    std.math.clamp(center.z, min.z, max.z),
+                );
+
+                const dist_sqr = std.math.pow(float, center.distance(closest), 2);
+                return dist_sqr < self.radius_sqr;
+            },
+            else => false,
+        };
+    }
 };
+
+// Blatant ChatGPT
+fn point_in_triangle(p: Vec3f, a: Vec3f, b: Vec3f, c: Vec3f) bool {
+    const u = b.subtract(a);
+    const v = c.subtract(a);
+    const w = p.subtract(a);
+
+    const uu = u.dot(u);
+    const uv = u.dot(v);
+    const vv = v.dot(v);
+    const wu = w.dot(u);
+    const wv = w.dot(v);
+
+    const D = uv * uv - uu * vv;
+
+    const s = (uv * wv - vv * wu) / D;
+    if (s < 0 or s > 1) return false;
+
+    const t = (uv * wu - uu * wv) / D;
+    if (t < 0 or (s + t) > 1) return false;
+
+    return true;
+}

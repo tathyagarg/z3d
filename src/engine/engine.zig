@@ -135,7 +135,7 @@ pub const Engine = struct {
 
             for (self.scene.objects.items) |o| {
                 var phy = o.get_physics_engine() orelse continue;
-                try phy.update();
+                try phy.update(self.scene.objects);
             }
             try self.scene.render(&self.frame_buffer);
 

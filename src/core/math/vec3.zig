@@ -296,8 +296,14 @@ pub fn Vec3(comptime T: type) type {
             };
         }
 
-        pub fn mix(self: Self, other: Self, ratio: f32) Self {
+        pub fn mix(self: Self, other: Self, ratio: T) Self {
             return self.multiply(1 - ratio).add(other.multiply(ratio));
+        }
+
+        pub fn distance(self: Self, other: Self) T {
+            return sqrt(pow(T, self.x - other.x, 2) +
+                pow(T, self.y - other.y, 2) +
+                pow(T, self.z - other.z, 2));
         }
     };
 }

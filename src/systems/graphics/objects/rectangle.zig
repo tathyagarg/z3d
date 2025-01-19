@@ -20,6 +20,8 @@ const ArrayList = @import("std").ArrayList;
 const RGB = @import("../graphics.zig").RGB;
 
 pub const Rectangle = struct {
+    id: ?usize = null,
+
     vertices: [4]Vec3f,
 
     position: position.PositionHandler,
@@ -46,7 +48,7 @@ pub const Rectangle = struct {
             .vertices = vertices,
             .position = position.PositionHandler{
                 .multi = position.MultiPointHandler{
-                    .points = @ptrCast(&vertices),
+                    .points = @constCast(&vertices),
                     .point_count = 4,
                 },
             },
@@ -225,72 +227,42 @@ pub fn Cuboid(
     return [6]Rectangle{
         // Top
         Rectangle.init(
-            [4]Vec3f{
-                vertices[0],
-                vertices[1],
-                vertices[2],
-                vertices[3],
-            },
+            [4]Vec3f{ vertices[0], vertices[1], vertices[2], vertices[3] },
             materials[0],
             physics_engine,
             !inverted,
         ),
         // Bottom
         Rectangle.init(
-            [4]Vec3f{
-                vertices[4],
-                vertices[5],
-                vertices[6],
-                vertices[7],
-            },
+            [4]Vec3f{ vertices[4], vertices[5], vertices[6], vertices[7] },
             materials[1],
             physics_engine,
             inverted,
         ),
         // Back
         Rectangle.init(
-            [4]Vec3f{
-                vertices[0],
-                vertices[1],
-                vertices[5],
-                vertices[4],
-            },
+            [4]Vec3f{ vertices[0], vertices[1], vertices[5], vertices[4] },
             materials[2],
             physics_engine,
             inverted,
         ),
         // Right
         Rectangle.init(
-            [4]Vec3f{
-                vertices[1],
-                vertices[2],
-                vertices[6],
-                vertices[5],
-            },
+            [4]Vec3f{ vertices[1], vertices[2], vertices[6], vertices[5] },
             materials[3],
             physics_engine,
             inverted,
         ),
         // Front
         Rectangle.init(
-            [4]Vec3f{
-                vertices[2],
-                vertices[3],
-                vertices[7],
-                vertices[6],
-            },
+            [4]Vec3f{ vertices[2], vertices[3], vertices[7], vertices[6] },
             materials[4],
             physics_engine,
             inverted,
         ),
         // Left
         Rectangle.init(
-            [4]Vec3f{
-                vertices[3],
-                vertices[0],
-                vertices[4],
-                vertices[7],
-            },
+            [4]Vec3f{ vertices[3], vertices[0], vertices[4], vertices[7] },
             materials[5],
             physics_engine,
             inverted,
