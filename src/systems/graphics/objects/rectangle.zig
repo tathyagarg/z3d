@@ -174,13 +174,56 @@ pub const Rectangle = struct {
     }
 };
 
+pub const CuboidMaterial = union(enum) {
+    Uniform: *const Material,
+    TopBottomSide: [3]*const Material,
+    PerFace: PerFace,
+};
+
+pub const PerFace = struct {
+    top: *const Material,
+    bottom: *const Material,
+    left: *const Material,
+    right: *const Material,
+    front: *const Material,
+    back: *const Material,
+};
+
 pub fn Cuboid(
     vertices: [8]Vec3f,
-    materials: [6]*const Material,
+    materials_data: CuboidMaterial,
     physics_engine: ?*physics.PhysicsEngine,
     inverted: bool,
 ) [6]Rectangle {
+    const materials = switch (materials_data) {
+        .Uniform => |material| [6]*const Material{
+            material,
+            material,
+            material,
+            material,
+            material,
+            material,
+        },
+        .TopBottomSide => |materials| [6]*const Material{
+            materials[0],
+            materials[1],
+            materials[2],
+            materials[2],
+            materials[2],
+            materials[2],
+        },
+        .PerFace => |materials| [6]*const Material{
+            materials.top,
+            materials.bottom,
+            materials.back,
+            materials.right,
+            materials.front,
+            materials.left,
+        },
+    };
+
     return [6]Rectangle{
+        // Top
         Rectangle.init(
             [4]Vec3f{
                 vertices[0],
@@ -192,6 +235,7 @@ pub fn Cuboid(
             physics_engine,
             !inverted,
         ),
+        // Bottom
         Rectangle.init(
             [4]Vec3f{
                 vertices[4],
@@ -203,6 +247,7 @@ pub fn Cuboid(
             physics_engine,
             inverted,
         ),
+        // Back
         Rectangle.init(
             [4]Vec3f{
                 vertices[0],
@@ -214,6 +259,7 @@ pub fn Cuboid(
             physics_engine,
             inverted,
         ),
+        // Right
         Rectangle.init(
             [4]Vec3f{
                 vertices[1],
@@ -225,6 +271,7 @@ pub fn Cuboid(
             physics_engine,
             inverted,
         ),
+        // Front
         Rectangle.init(
             [4]Vec3f{
                 vertices[2],
@@ -236,6 +283,7 @@ pub fn Cuboid(
             physics_engine,
             inverted,
         ),
+        // Left
         Rectangle.init(
             [4]Vec3f{
                 vertices[3],

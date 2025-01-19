@@ -14,6 +14,7 @@ const EventHandler = z3d.event_handler.EventHandler;
 const RGB = graphics.RGB;
 const Texture = graphics.material.Texture;
 const Image = z3d.images.Image;
+const Material = graphics.material.Material;
 
 const Vec3 = math.Vec3(f32);
 const Vec2 = math.Vec2(f32);
@@ -33,11 +34,11 @@ pub fn main() !void {
         Vec3.init(0, 0, 3),
     };
 
-    const colors = [_]graphics.material.Material{
-        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 0, .b = 0 } } },
-        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 0, .b = 255 } } },
-        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 255, .b = 0 } } },
-        graphics.material.Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 255, .b = 255 } } },
+    const colors = [_]Material{
+        Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 0, .b = 0 } } },
+        Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 0, .b = 255 } } },
+        Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 255, .g = 255, .b = 0 } } },
+        Material{ .texture = Texture{ .SOLID_COLOR = RGB{ .r = 0, .g = 255, .b = 255 } } },
     };
 
     for (0..positions.len) |i| {
@@ -60,20 +61,73 @@ pub fn main() !void {
 
     var image = try Image.init("tests/assets/textures/texture01.png");
     defer image.deinit();
-    const mesh_mat = graphics.material.Material{
+
+    var image2 = try Image.init("tests/assets/textures/texture02.png");
+    defer image2.deinit();
+
+    var image3 = try Image.init("tests/assets/textures/texture03.png");
+    defer image3.deinit();
+
+    var image4 = try Image.init("tests/assets/textures/texture04.png");
+    defer image4.deinit();
+
+    var image5 = try Image.init("tests/assets/textures/texture05.png");
+    defer image5.deinit();
+
+    var image6 = try Image.init("tests/assets/textures/texture06.png");
+    defer image6.deinit();
+
+    const left_mesh_mat = graphics.material.Material{
         .material_type = .DIFFUSE_AND_GLOSSY,
         .texture = Texture{
             .TEXTURE_FILE = image,
         },
     };
 
-    const materials = [6]*const graphics.material.Material{
-        &mesh_mat,
-        &mesh_mat,
-        &mesh_mat,
-        &mesh_mat,
-        &mesh_mat,
-        &mesh_mat,
+    const right_mesh_mat = graphics.material.Material{
+        .material_type = .DIFFUSE_AND_GLOSSY,
+        .texture = Texture{
+            .TEXTURE_FILE = image2,
+        },
+    };
+
+    const front_mesh_mat = graphics.material.Material{
+        .material_type = .DIFFUSE_AND_GLOSSY,
+        .texture = Texture{
+            .TEXTURE_FILE = image3,
+        },
+    };
+
+    const back_mesh_mat = graphics.material.Material{
+        .material_type = .DIFFUSE_AND_GLOSSY,
+        .texture = Texture{
+            .TEXTURE_FILE = image4,
+        },
+    };
+
+    const top_mesh_mat = graphics.material.Material{
+        .material_type = .DIFFUSE_AND_GLOSSY,
+        .texture = Texture{
+            .TEXTURE_FILE = image5,
+        },
+    };
+
+    const bottom_mesh_mat = graphics.material.Material{
+        .material_type = .DIFFUSE_AND_GLOSSY,
+        .texture = Texture{
+            .TEXTURE_FILE = image6,
+        },
+    };
+
+    const materials = graphics.objects.CuboidMaterial{
+        .PerFace = graphics.objects.PerFace{
+            .top = &top_mesh_mat,
+            .bottom = &bottom_mesh_mat,
+            .left = &left_mesh_mat,
+            .right = &right_mesh_mat,
+            .front = &front_mesh_mat,
+            .back = &back_mesh_mat,
+        },
     };
 
     for (0.., objects.Cuboid(vertices_data, materials, null, true)) |i, rectangle| {
