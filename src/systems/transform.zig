@@ -13,11 +13,23 @@ pub const SinglePointHandler = struct {
 };
 
 pub const MultiPointHandler = struct {
-    points: [*]Vec3f,
+    points: []Vec3f,
     point_count: usize,
     is_static: bool = false,
 
+    bound: Bounds = undefined,
+
     const Self = @This();
+
+    pub fn init(points: []Vec3f, point_count: usize, is_static: bool) Self {
+        var mph = Self{
+            .points = points,
+            .point_count = point_count,
+            .is_static = is_static,
+        };
+        mph.bound = mph.bounding_box();
+        return mph;
+    }
 
     pub fn bounding_box(self: Self) Bounds {
         var minimum = Vec3f.infinity();
@@ -50,7 +62,7 @@ pub const PositionHandler = union(enum) {
                 for (0..m.point_count, m.points) |i, p| {
                     m.points[i] = p.add(dxyz);
                 }
-            }
+            },
         }
     }
 

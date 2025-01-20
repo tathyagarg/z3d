@@ -39,18 +39,23 @@ pub const Rectangle = struct {
     normal: Vec3f = undefined,
 
     pub fn init(
-        vertices: [4]Vec3f,
+        v0: Vec3f,
+        v1: Vec3f,
+        v2: Vec3f,
+        v3: Vec3f,
         material: *const Material,
         physics_engine: ?*physics.PhysicsEngine,
         inverted: bool,
     ) Rectangle {
+        // std.debug.print("Uh: {any}\n\n\n\n", .{@TypeOf(@as([]Vec3f, vertices[0..]))});
         var rect = Rectangle{
-            .vertices = vertices,
+            .vertices = [4]Vec3f{ v0, v1, v2, v3 },
             .position = position.PositionHandler{
-                .multi = position.MultiPointHandler{
-                    .points = @constCast(&vertices),
-                    .point_count = 4,
-                },
+                .multi = position.MultiPointHandler.init(
+                    @constCast(&[4]Vec3f{ v0, v1, v2, v3 }),
+                    4,
+                    false,
+                ),
             },
             .material = material,
             .physics = physics_engine,
@@ -192,7 +197,7 @@ pub const PerFace = struct {
 };
 
 pub fn Cuboid(
-    vertices: [8]Vec3f,
+    vertices: *const [8]Vec3f,
     materials_data: CuboidMaterial,
     physics_engine: ?*physics.PhysicsEngine,
     inverted: bool,
@@ -227,42 +232,60 @@ pub fn Cuboid(
     return [6]Rectangle{
         // Top
         Rectangle.init(
-            [4]Vec3f{ vertices[0], vertices[1], vertices[2], vertices[3] },
+            vertices.*[0],
+            vertices.*[1],
+            vertices.*[2],
+            vertices.*[3],
             materials[0],
             physics_engine,
             !inverted,
         ),
         // Bottom
         Rectangle.init(
-            [4]Vec3f{ vertices[4], vertices[5], vertices[6], vertices[7] },
+            vertices.*[4],
+            vertices.*[5],
+            vertices.*[6],
+            vertices.*[7],
             materials[1],
             physics_engine,
             inverted,
         ),
         // Back
         Rectangle.init(
-            [4]Vec3f{ vertices[0], vertices[1], vertices[5], vertices[4] },
+            vertices.*[0],
+            vertices.*[1],
+            vertices.*[5],
+            vertices.*[4],
             materials[2],
             physics_engine,
             inverted,
         ),
         // Right
         Rectangle.init(
-            [4]Vec3f{ vertices[1], vertices[2], vertices[6], vertices[5] },
+            vertices.*[1],
+            vertices.*[2],
+            vertices.*[6],
+            vertices.*[5],
             materials[3],
             physics_engine,
             inverted,
         ),
         // Front
         Rectangle.init(
-            [4]Vec3f{ vertices[2], vertices[3], vertices[7], vertices[6] },
+            vertices.*[2],
+            vertices.*[3],
+            vertices.*[7],
+            vertices.*[6],
             materials[4],
             physics_engine,
             inverted,
         ),
         // Left
         Rectangle.init(
-            [4]Vec3f{ vertices[3], vertices[0], vertices[4], vertices[7] },
+            vertices.*[3],
+            vertices.*[0],
+            vertices.*[4],
+            vertices.*[7],
             materials[5],
             physics_engine,
             inverted,

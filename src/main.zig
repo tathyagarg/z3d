@@ -138,10 +138,11 @@ pub fn main() !void {
             .back = &back_mesh_mat,
         },
     };
+    _ = .{ materials, vertices_data };
 
-    for (0.., objects.Cuboid(vertices_data, materials, null, true)) |i, rectangle| {
-        const rect = @constCast(&rectangle).rotate_clockwise(@as(u2, @intCast(i % 2)));
-        var rect_obj = objects.Object{ .rectangle = rect.* };
+    for (objects.Cuboid(&vertices_data, materials, null, true)) |rectangle| {
+        // const rect = @constCast(&rectangle).rotate_clockwise(@as(u2, @intCast(i % 2)));
+        var rect_obj = objects.Object{ .rectangle = rectangle };
         rect_obj.rectangle.id = objects.id_counter;
         objects.assigned();
         try scene_objects.append(rect_obj);
@@ -149,12 +150,10 @@ pub fn main() !void {
 
     var rect = objects.Object{
         .rectangle = objects.Rectangle.init(
-            [4]Vec3{
-                Vec3.init(-6, -6, -6),
-                Vec3.init(-6, -6, 6),
-                Vec3.init(6, -6, 6),
-                Vec3.init(6, -6, -6),
-            },
+            Vec3.init(-6, -6, -6),
+            Vec3.init(-6, -6, 6),
+            Vec3.init(6, -6, 6),
+            Vec3.init(6, -6, -6),
             &left_mesh_mat,
             null,
             false,

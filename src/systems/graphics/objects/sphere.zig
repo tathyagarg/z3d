@@ -92,14 +92,18 @@ pub const Sphere = struct {
                 return distance < (self.radius + s.radius);
             },
             .rectangle => |r| {
-                const min = r.position.multi.bounding_box().minimum;
-                const max = r.position.multi.bounding_box().maximum;
+                const min = r.position.multi.bound.minimum;
+                const max = r.position.multi.bound.maximum;
 
                 const center = self.position.single.point;
 
+                // std.debug.print("0 ({d}, {d})\n", .{ center.x, min.x });
                 if (center.x + self.radius < min.x or center.x - self.radius > max.x) return false;
+                // std.debug.print("1", .{});
                 if (center.y + self.radius < min.y or center.y - self.radius > max.y) return false;
+                // std.debug.print("2", .{});
                 if (center.z + self.radius < min.z or center.z - self.radius > max.z) return false;
+                // std.debug.print("3", .{});
 
                 const closest = Vec3f.init(
                     std.math.clamp(center.x, min.x, max.x),
@@ -107,8 +111,8 @@ pub const Sphere = struct {
                     std.math.clamp(center.z, min.z, max.z),
                 );
 
-                const dist_sqr = std.math.pow(float, center.distance(closest), 2);
-                return dist_sqr < self.radius_sqr;
+                const dist = center.distance(closest);
+                return dist * dist < self.radius_sqr;
             },
             else => false,
         };

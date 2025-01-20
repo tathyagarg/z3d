@@ -59,9 +59,7 @@ pub const PhysicsEngine = struct {
         for (objects.items) |object| {
             if (self.obj_id == object.get_id()) continue;
 
-            if (self.object.intersects(object)) {
-                collision = true;
-            }
+            if (self.object.intersects(object)) collision = true;
         }
 
         if (!collision) {
