@@ -46,15 +46,16 @@ pub const Sphere = struct {
     }
 
     pub fn intersects(self: Self, ray: Ray, t: *float) bool {
-        // If the ray is going in the opposite direction of the sphere, return false
-        // if ((self.position.single.point.x < ray.origin.x and ray.direction.x > 0) or
-        //     (self.position.single.point.y < ray.origin.y and ray.direction.y > 0) or
-        //     (self.position.single.point.z < ray.origin.z and ray.direction.z > 0) or
-        //     (self.position.single.point.x > ray.origin.x and ray.direction.x < 0) or
-        //     (self.position.single.point.y > ray.origin.y and ray.direction.y < 0) or
-        //     (self.position.single.point.z > ray.origin.z and ray.direction.z < 0)) return false;
+        // This is probs an optimization idk bruh
+        const center = self.position.single.point;
+        if ((center.x + self.radius < ray.origin.x and ray.direction.x > 0) or
+            (center.y + self.radius < ray.origin.y and ray.direction.y > 0) or
+            (center.z + self.radius < ray.origin.z and ray.direction.z > 0) or
+            (center.x - self.radius > ray.origin.x and ray.direction.x < 0) or
+            (center.y - self.radius > ray.origin.y and ray.direction.y < 0) or
+            (center.z - self.radius > ray.origin.z and ray.direction.z < 0)) return false;
 
-        const origin: Vec3f = ray.origin.subtract(self.position.single.point.*);
+        const origin: Vec3f = ray.origin.subtract(center.*);
         const a: float = ray.direction.dot(ray.direction);
         const b: float = 2 * ray.direction.dot(origin);
         const c: float = origin.dot(origin) - self.radius_sqr;
