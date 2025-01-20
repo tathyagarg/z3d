@@ -82,14 +82,14 @@ pub const Sphere = struct {
         normal.* = (P.subtract(self.position.single.point.*)).normalize();
     }
 
-    pub fn object_intersects(self: Self, other: Object) bool {
+    pub fn object_intersects(self: Self, other: Object) struct { bool, Vec3f } {
         return switch (other) {
             .sphere => |s| {
                 const other_center = s.position.single.point;
                 const self_center = self.position.single.point;
                 const distance = self_center.distance(other_center.*);
 
-                return distance < (self.radius + s.radius);
+                return .{ distance < (self.radius + s.radius), undefined };
             },
             .rectangle => |r| {
                 const min = r.position.multi.bound.minimum;
@@ -97,13 +97,9 @@ pub const Sphere = struct {
 
                 const center = self.position.single.point;
 
-                // std.debug.print("0 ({d}, {d})\n", .{ center.x, min.x });
-                if (center.x + self.radius < min.x or center.x - self.radius > max.x) return false;
-                // std.debug.print("1", .{});
-                if (center.y + self.radius < min.y or center.y - self.radius > max.y) return false;
-                // std.debug.print("2", .{});
-                if (center.z + self.radius < min.z or center.z - self.radius > max.z) return false;
-                // std.debug.print("3", .{});
+                if (center.x + self.radius < min.x or center.x - self.radius > max.x) return .{ false, undefined };
+                if (center.y + self.radius < min.y or center.y - self.radius > max.y) return .{ false, undefined };
+                if (center.z + self.radius < min.z or center.z - self.radius > max.z) return .{ false, undefined };
 
                 const closest = Vec3f.init(
                     std.math.clamp(center.x, min.x, max.x),
@@ -112,9 +108,9 @@ pub const Sphere = struct {
                 );
 
                 const dist = center.distance(closest);
-                return dist * dist < self.radius_sqr;
+                return .{ dist * dist < self.radius_sqr, closest };
             },
-            else => false,
+            else => .{ false, undefined },
         };
     }
 };

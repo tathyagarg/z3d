@@ -56,12 +56,26 @@ pub const PhysicsEngine = struct {
 
     pub fn update(self: *Self, objects: *ArrayList(Object)) !void {
         var collision = false;
+        var distance: Vec3f = undefined;
+
         for (objects.items) |object| {
             if (self.obj_id == object.get_id()) continue;
 
-            if (self.object.intersects(object)) collision = true;
+            const res = self.object.intersects(object);
+            if (res[0]) {
+                collision = true;
+                distance = self.pos_handler.get_distance_from(res[1]);
+            }
         }
 
+        const offset = switch (self.object) {
+            .sphere => |s| s.radius,
+            else => 0,
+        };
+
+        if (collision and @abs(distance.norm() - offset) > 0.01) {
+            self.pos_handler.translate(Vec3f.init(0, 0.01, 0));
+        }
         if (!collision) {
             self.force = self.force.add(self.resting_force);
 

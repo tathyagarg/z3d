@@ -84,4 +84,11 @@ pub const PositionHandler = union(enum) {
             .multi => unreachable, // TODO: IMPLEMENT THIS
         };
     }
+
+    pub fn get_distance_from(self: Self, other: Vec3f) Vec3f {
+        return switch (self) {
+            .single => |s| other.subtract(s.point.*),
+            .multi => unreachable, // TODO: IMPLEMENT THIS
+        };
+    }
 };

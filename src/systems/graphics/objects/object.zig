@@ -114,7 +114,7 @@ pub const Object = union(enum) {
         }
     }
 
-    pub fn intersects(self: Self, other: Object) bool {
+    pub fn intersects(self: Self, other: Object) struct { bool, Vec3f } {
         return switch (self) {
             .sphere => |s| s.object_intersects(other),
             else => unreachable, // TODO:
