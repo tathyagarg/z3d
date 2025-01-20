@@ -44,7 +44,7 @@ pub const Image = struct {
     pub fn deinit(self: *Self) void {
         self.file_buffer.close();
         switch (self.file_type) {
-            FileData.PNG => self.file_type.PNG.deinit(),
+            .PNG => self.file_type.PNG.deinit(),
             else => {},
         }
     }
@@ -72,7 +72,7 @@ pub const Image = struct {
 
     pub fn sample(self: Self, uv: Vec2f) RGB {
         return switch (self.file_type) {
-            FileData.PNG => |img_data| img_data.sample(uv),
+            .PNG => |img_data| img_data.sample(uv),
             else => RGB{ .r = 0, .g = 0, .b = 0 },
         };
     }

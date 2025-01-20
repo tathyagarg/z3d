@@ -5,6 +5,7 @@ const engine = z3d.engine;
 const graphics = z3d.graphics;
 const math = z3d.math;
 const physics = z3d.physics;
+const gui = z3d.gui;
 const Scene = z3d.engine.Scene;
 const objects = graphics.objects;
 const Light = graphics.Light;
@@ -141,7 +142,6 @@ pub fn main() !void {
     _ = .{ materials, vertices_data };
 
     for (objects.Cuboid(&vertices_data, materials, null, true)) |rectangle| {
-        // const rect = @constCast(&rectangle).rotate_clockwise(@as(u2, @intCast(i % 2)));
         var rect_obj = objects.Object{ .rectangle = rectangle };
         rect_obj.rectangle.id = objects.id_counter;
         objects.assigned();
@@ -179,14 +179,6 @@ pub fn main() !void {
     try lights.append(light);
     try lights.append(light2);
 
-    // const cam = Camera{
-    //     .position = &transform.PositionHandler{
-    //         .single = transform.SinglePointHandler{
-    //             .point = @constCast(&Vec3.init(0, 0, 0)),
-    //         },
-    //     },
-    //     .direction = @constCast(&Vec3.init(0, 90, 0)),
-    // };
     const pos_handler = transform.PositionHandler{ .single = transform.SinglePointHandler{
         .point = @constCast(&Vec3.zero()),
         .direction = @constCast(&Vec3.zero()),
@@ -201,6 +193,9 @@ pub fn main() !void {
         },
     };
 
+    var gui_layer = gui.GUI_Layer.init();
+    defer gui_layer.deinit();
+
     const scene = try Scene.init(
         cam,
         &scene_objects,
@@ -213,7 +208,18 @@ pub fn main() !void {
             },
             .cpu_count = 4,
         },
+        &gui_layer,
     );
+    try scene.gui.add_gui(gui.GUI_Element{
+        .Image = gui.GUI_Image{
+            .image = try Image.init("tests/assets/textures/texture01.png"),
+            .position = gui.GUI_Bounds{
+                .top_left = Vec2.init(150, 150),
+                .bottom_right = Vec2.init(250, 250),
+            },
+        },
+    });
+
     var eng = try engine.Engine.init(
         "Z3D",
         1,

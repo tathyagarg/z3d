@@ -22,7 +22,6 @@ pub const EventHandler = packed struct {
     const Self = @This();
 
     pub fn handle_event(self: Self, event: sdl.SDL_Event, position: *const PositionHandler) void {
-        _ = .{ self, position };
         switch (event.type) {
             sdl.SDL_KEYDOWN => if (self.keyboard_movement) {
                 const direction = position.get_direction();

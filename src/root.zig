@@ -6,3 +6,4 @@ pub const physics = @import("systems/physics/physics.zig");
 pub const transform = @import("systems/transform.zig");
 pub const event_handler = @import("systems/event_handler.zig");
 pub const images = @import("systems/images/images.zig");
+pub const gui = @import("systems/gui/gui.zig");

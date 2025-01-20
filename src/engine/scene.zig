@@ -19,6 +19,7 @@ const Vec3 = math.Vec3;
 const Vec3f = Vec3(float);
 
 const RGB = @import("../systems/graphics/graphics.zig").RGB;
+const GUI_Layer = @import("../systems/gui/gui.zig").GUI_Layer;
 const allocator = std.heap.page_allocator;
 
 pub const RenderingOption = struct {
@@ -35,6 +36,8 @@ pub const Scene = struct {
     ray_casting_options: *const RayCastingOptions,
     camera: Camera,
 
+    gui: *GUI_Layer = undefined,
+
     cpu_count: usize,
 
     const Self = @This();
@@ -48,6 +51,7 @@ pub const Scene = struct {
             ray_casting_options: *const RayCastingOptions = &RayCastingOptions{},
             cpu_count: usize = 0,
         },
+        gui_layer: *GUI_Layer,
     ) !Self {
         return Self{
             .camera = camera,
@@ -56,6 +60,7 @@ pub const Scene = struct {
             .label = options.label,
             .ray_casting_options = options.ray_casting_options,
             .cpu_count = if (options.cpu_count == 0) try std.Thread.getCpuCount() else options.cpu_count,
+            .gui = gui_layer,
         };
     }
 
@@ -75,7 +80,16 @@ pub const Scene = struct {
         const x_end = if (rendering_options.x_end == 0) self.ray_casting_options.width else rendering_options.x_end;
 
         for (rendering_options.y_start..y_end) |j| {
-            for (rendering_options.x_start..x_end) |i| {
+            x_render: for (rendering_options.x_start..x_end) |i| {
+                for (self.gui.elements.items) |gui_elem| {
+                    if (gui_elem.contains(i, j)) {
+                        const local = gui_elem.to_local_space(i, j);
+                        frame_buffer.*[j * self.ray_casting_options.width + i] =
+                            gui_elem.render_at(local.multiply(0.01));
+                        continue :x_render;
+                    }
+                }
+
                 const x: float =
                     (2 * (@as(float, @floatFromInt(i)) + 0.5) /
                     @as(float, @floatFromInt(self.ray_casting_options.width)) - 1) *
