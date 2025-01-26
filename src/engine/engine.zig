@@ -10,7 +10,6 @@ pub const Camera = cameralib.Camera;
 
 const sdl = @cImport(@cInclude("SDL2/SDL.h"));
 const std = @import("std");
-const allocator = std.heap.page_allocator;
 
 const math = @import("../core/math/math.zig");
 const float = @import("../core/constants.zig").FLOAT;
@@ -52,6 +51,7 @@ pub const Engine = struct {
     scene: Scene,
 
     prev: usize = 0,
+    allocator: std.mem.Allocator,
 
     pub fn init(
         title: [*:0]const u8,
@@ -61,6 +61,7 @@ pub const Engine = struct {
         height: u16,
         flags: WindowFlags,
         scene: Scene,
+        allocator: std.mem.Allocator,
     ) !Engine {
         _ = .{ x, y };
         if (sdl.SDL_Init(sdl.SDL_INIT_EVERYTHING) != 0) {
@@ -108,11 +109,12 @@ pub const Engine = struct {
             .height = height,
             .frame_buffer = initial_frame_buf,
             .scene = scene,
+            .allocator = allocator,
         };
     }
 
     pub fn deinit(self: Engine) void {
-        allocator.free(self.frame_buffer);
+        self.allocator.free(self.frame_buffer);
         sdl.SDL_DestroyRenderer(self.renderer);
         sdl.SDL_DestroyWindow(self.window);
         sdl.SDL_Quit();
