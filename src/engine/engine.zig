@@ -67,8 +67,8 @@ pub const Engine = struct {
             std.debug.print("{any}\n", .{sdl.SDL_GetError()});
             return error.EngineInitializationFailed;
         }
-        const x_pos = if (x == 0) sdl.SDL_WINDOWPOS_CENTERED else x;
-        const y_pos = if (y == 0) sdl.SDL_WINDOWPOS_CENTERED else y;
+        const x_pos: c_int = if (x == 0) sdl.SDL_WINDOWPOS_CENTERED else x;
+        const y_pos: c_int = if (y == 0) sdl.SDL_WINDOWPOS_CENTERED else y;
 
         const window = sdl.SDL_CreateWindow(
             title,
