@@ -24,7 +24,8 @@ const mat = @import("../material.zig");
 
 pub var id_counter: usize = 0;
 
-pub fn assigned() void {
+pub fn assigned(obj: *Object) void {
+    obj.assign_id();
     id_counter += 1;
 }
 
