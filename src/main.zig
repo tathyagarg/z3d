@@ -228,6 +228,7 @@ pub fn main() !void {
         HEIGHT,
         engine.WindowFlags.default(),
         scene,
+        allocator,
     );
     defer eng.deinit();
 
