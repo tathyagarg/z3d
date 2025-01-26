@@ -59,7 +59,7 @@ pub const EventHandler = packed struct {
                     else => {},
                 }
             },
-            sdl.SDL_MOUSEMOTION => {
+            sdl.SDL_MOUSEMOTION => if (self.mouse_movement) {
                 const x: i32, const y: i32 = .{ event.motion.xrel, event.motion.yrel };
                 position.rotate(Vec3f.init(
                     (180 * @as(float, @floatFromInt(y)) / @as(f32, @floatFromInt(self.height))),
