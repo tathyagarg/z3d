@@ -57,7 +57,6 @@ pub const Rectangle = struct {
                 ),
             },
             .material = material,
-            .physics = physics_engine,
         };
         rect.compute_normal(inverted);
 
