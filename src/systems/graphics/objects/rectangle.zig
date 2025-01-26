@@ -44,7 +44,6 @@ pub const Rectangle = struct {
         v2: Vec3f,
         v3: Vec3f,
         material: *const Material,
-        physics_engine: ?*physics.PhysicsEngine,
         inverted: bool,
     ) Rectangle {
         // std.debug.print("Uh: {any}\n\n\n\n", .{@TypeOf(@as([]Vec3f, vertices[0..]))});
@@ -199,7 +198,6 @@ pub const PerFace = struct {
 pub fn Cuboid(
     vertices: *const [8]Vec3f,
     materials_data: CuboidMaterial,
-    physics_engine: ?*physics.PhysicsEngine,
     inverted: bool,
 ) [6]Rectangle {
     const materials = switch (materials_data) {
@@ -237,7 +235,6 @@ pub fn Cuboid(
             vertices.*[2],
             vertices.*[3],
             materials[0],
-            physics_engine,
             !inverted,
         ),
         // Bottom
@@ -247,7 +244,6 @@ pub fn Cuboid(
             vertices.*[6],
             vertices.*[7],
             materials[1],
-            physics_engine,
             inverted,
         ),
         // Back
@@ -257,7 +253,6 @@ pub fn Cuboid(
             vertices.*[5],
             vertices.*[4],
             materials[2],
-            physics_engine,
             inverted,
         ),
         // Right
@@ -267,7 +262,6 @@ pub fn Cuboid(
             vertices.*[6],
             vertices.*[5],
             materials[3],
-            physics_engine,
             inverted,
         ),
         // Front
@@ -277,7 +271,6 @@ pub fn Cuboid(
             vertices.*[7],
             vertices.*[6],
             materials[4],
-            physics_engine,
             inverted,
         ),
         // Left
@@ -287,7 +280,6 @@ pub fn Cuboid(
             vertices.*[4],
             vertices.*[7],
             materials[5],
-            physics_engine,
             inverted,
         ),
     };

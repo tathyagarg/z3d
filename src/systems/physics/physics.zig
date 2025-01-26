@@ -32,23 +32,18 @@ pub const PhysicsEngine = struct {
     pub fn init(
         object: Object,
         options: struct {
-            velocity: ?Vec3f = null,
-            force: ?Vec3f = null,
-            acceleration: ?Vec3f = null,
-            mass: ?float = null,
+            velocity: Vec3f = Vec3f.zero(),
+            force: Vec3f = Vec3f.zero(),
+            acceleration: Vec3f = Vec3f.zero(),
+            mass: float = 1,
         },
     ) Self {
-        const velocity = options.velocity orelse Vec3f.zero();
-        const force = options.force orelse Vec3f.zero();
-        const acceleration = options.acceleration orelse Vec3f.zero();
-        const mass = options.mass orelse 1;
-
         return Self{
             .object = object,
-            .velocity = velocity,
-            .force = force,
-            .acceleration = acceleration,
-            .inv_mass = 1 / mass,
+            .velocity = options.velocity,
+            .force = options.force,
+            .acceleration = options.acceleration,
+            .inv_mass = 1 / options.mass,
             .pos_handler = object.get_position_handler(),
             .obj_id = object.get_id(),
         };

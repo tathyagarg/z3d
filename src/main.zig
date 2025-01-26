@@ -141,7 +141,7 @@ pub fn main() !void {
     };
     _ = .{ materials, vertices_data };
 
-    for (objects.Cuboid(&vertices_data, materials, null, true)) |rectangle| {
+    for (objects.Cuboid(&vertices_data, materials, true)) |rectangle| {
         var rect_obj = objects.Object{ .rectangle = rectangle };
         objects.assigned(&rect_obj);
         try scene_objects.append(rect_obj);
@@ -154,7 +154,6 @@ pub fn main() !void {
             Vec3.init(6, -6, 6),
             Vec3.init(6, -6, -6),
             &left_mesh_mat,
-            null,
             false,
         ),
     };
