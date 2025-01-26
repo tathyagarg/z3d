@@ -46,7 +46,7 @@ pub fn main() !void {
         var sphere = objects.Object{
             .sphere = objects.Sphere.init(@constCast(&positions[i]), 1, &colors[i]),
         };
-        sphere.assign_id();
+        objects.assigned(&sphere);
         try scene_objects.append(sphere);
     }
 
