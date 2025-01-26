@@ -143,8 +143,7 @@ pub fn main() !void {
 
     for (objects.Cuboid(&vertices_data, materials, null, true)) |rectangle| {
         var rect_obj = objects.Object{ .rectangle = rectangle };
-        rect_obj.rectangle.id = objects.id_counter;
-        objects.assigned();
+        objects.assigned(&rect_obj);
         try scene_objects.append(rect_obj);
     }
 
@@ -159,8 +158,7 @@ pub fn main() !void {
             false,
         ),
     };
-    rect.rectangle.id = objects.id_counter;
-    objects.assigned();
+    objects.assigned(&rect);
     try scene_objects.append(rect);
 
     const light = Light{
