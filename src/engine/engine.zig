@@ -63,16 +63,17 @@ pub const Engine = struct {
         scene: Scene,
         allocator: std.mem.Allocator,
     ) !Engine {
-        _ = .{ x, y };
         if (sdl.SDL_Init(sdl.SDL_INIT_EVERYTHING) != 0) {
             std.debug.print("{any}\n", .{sdl.SDL_GetError()});
             return error.EngineInitializationFailed;
         }
+        const x_pos = if (x == 0) sdl.SDL_WINDOWPOS_CENTERED else x;
+        const y_pos = if (y == 0) sdl.SDL_WINDOWPOS_CENTERED else y;
 
         const window = sdl.SDL_CreateWindow(
             title,
-            sdl.SDL_WINDOWPOS_CENTERED,
-            sdl.SDL_WINDOWPOS_CENTERED,
+            x_pos,
+            y_pos,
             width,
             height,
             flags.as_int(),
