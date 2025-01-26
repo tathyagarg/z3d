@@ -193,7 +193,7 @@ pub fn main() !void {
         },
     };
 
-    var gui_layer = gui.GUI_Layer.init();
+    var gui_layer = gui.GUI_Layer.init(allocator);
     defer gui_layer.deinit();
 
     const scene = try Scene.init(

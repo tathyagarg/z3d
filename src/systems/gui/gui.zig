@@ -3,7 +3,6 @@ const std = @import("std");
 const Image = @import("../images/images.zig").Image;
 const RGB = @import("../graphics/graphics.zig").RGB;
 const float = @import("../../core/constants.zig").FLOAT;
-const allocator = std.heap.page_allocator;
 
 const Vec2 = @import("../../core/math/math.zig").Vec2;
 const Vec2f = Vec2(float);
@@ -70,7 +69,7 @@ pub const GUI_Element = union(enum) {
 pub const GUI_Layer = struct {
     elements: std.ArrayList(GUI_Element),
 
-    pub fn init() GUI_Layer {
+    pub fn init(allocator: std.mem.Allocator) GUI_Layer {
         return GUI_Layer{ .elements = std.ArrayList(GUI_Element).init(allocator) };
     }
 
