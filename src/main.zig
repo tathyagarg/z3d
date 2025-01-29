@@ -51,7 +51,7 @@ pub fn main() !void {
     }
 
     var physics_eng = physics.PhysicsEngine.init(
-        scene_objects.items[0],
+        scene_objects.items[3],
         .{},
     );
     physics_eng.apply_gravity(null);
@@ -209,10 +209,10 @@ pub fn main() !void {
     );
     try scene.gui.add_gui(gui.GUI_Element{
         .Image = gui.GUI_Image{
-            .image = try Image.init("tests/assets/textures/texture01.png"),
+            .image = image6,
             .position = gui.GUI_Bounds{
-                .top_left = Vec2.init(150, 150),
-                .bottom_right = Vec2.init(250, 250),
+                .top_left = Vec2.init(0, 0),
+                .bottom_right = Vec2.init(100, 100),
             },
         },
     });

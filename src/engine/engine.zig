@@ -143,7 +143,7 @@ pub const Engine = struct {
             try self.scene.render(&self.frame_buffer);
 
             const current = @as(usize, sdl.SDL_GetTicks());
-            std.debug.print("FPS: {d}\n", .{1000 / (current - self.prev)});
+            std.debug.print("FPS: {d}\r", .{1000 / (current - self.prev)});
 
             for (0..self.height) |j| {
                 for (0..self.width) |i| {
