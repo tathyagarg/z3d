@@ -1,16 +1,16 @@
 # TODO list of things to do
 
-- [ ] Zircon
+- [x] Zest 
 - [ ] Meshes
   - [x] Render Meshes
-  - [ ] Render Textures
+  - [x] Render Textures
   - [ ] Render from File
     - [ ] Load from *.stl
     - [ ] Load from *.obj
-- [ ] Collision Detection
+- [x] Collision Detection
 - [ ] Audio
 - [ ] FPS
-- [ ] User Interface
+- [x] User Interface
 - [ ] Documentation
 - [ ] Character follows Camera (3rd Person View)
 - [ ] Perlin Noise Generator
